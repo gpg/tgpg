@@ -1,0 +1,24 @@
+                        Tiny GNU Privacy Guard
+                      ==========================
+                            Version 0.0.0
+                                
+
+This is an OpenPGP implementation targeted to small devices and comes
+with a couple of restrictions.  It does not feature a key management
+but relies on gpg to provide a useful set of keys.  A syncronisation
+mechanism to achieve this is implemented.  The API is similar to
+GPGME.
+
+
+
+Requirements: 
+
+  sizeof (char) == 8
+  sizeof (int) >= 16
+  sizeof (long) >= 32
+  flat and linear address space
+  C-89 toolchain
+
+
+
+
