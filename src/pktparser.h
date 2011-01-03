@@ -23,7 +23,8 @@
 
 int _tgpg_identify_message (bufdesc_t msg, tgpg_msg_type_t *r_type);
 
-int _tgpg_parse_encrypted_message (bufdesc_t msg, size_t *r_start,
+int _tgpg_parse_encrypted_message (bufdesc_t msg, int *r_mdc,
+                                   size_t *r_start, size_t *r_length,
                                    keyinfo_t r_keyinfo, mpidesc_t r_encdat);
 
 #endif /*PKTPARSER_H*/

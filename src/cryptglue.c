@@ -159,7 +159,7 @@ _tgpg_pk_decrypt (int algo, mpidesc_t seckey, mpidesc_t encdat,
 unsigned int
 _tgpg_cipher_blocklen (int algo)
 {
-  if (algo == CIPHER_ALGO_AES
+  if (algo == CIPHER_ALGO_AES || algo == CIPHER_ALGO_AES192
       || algo == CIPHER_ALGO_AES256)
     return 16; 
   else

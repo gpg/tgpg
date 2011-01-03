@@ -117,7 +117,9 @@ decrypt_session_key (keyinfo_t keyinfo, mpidesc_t encdat,
 }
 
 
-
+/* Assume that CIPHER is a data object holding a complete encrypted
+   message.  Decrypt thet message and store the result into PLAIN.
+   CTX is the usual context.  Returns 0 on success.  */
 int
 tgpg_decrypt (tgpg_t ctx, tgpg_data_t cipher, tgpg_data_t plain)
 {
@@ -146,12 +148,24 @@ tgpg_decrypt (tgpg_t ctx, tgpg_data_t cipher, tgpg_data_t plain)
   rc = decrypt_session_key (keyinfo, encdat, &algo, &seskey, &seskeylen);
   if (!rc)
     {
+      size_t n;
       int i;
       
       fprintf (stderr, "DBG: algo: %d session key: ", algo);
       for (i=0; i < seskeylen; i++)
         fprintf (stderr, "%02X", ((unsigned char*)seskey)[i]);
       putc ('\n', stderr);
+      fprintf (stderr, "DBG: pky_encrypted at off %lu rest of data:\n",
+               (unsigned long)startoff);
+      
+      for (n=startoff, i=0; n < cipher->length; n++)
+        {
+          fprintf (stderr, "%02X", ((unsigned char*)cipher->image)[n]);
+          if (!(++i%32))
+            putc ('\n', stderr);
+        }
+      if ((i%32))
+        putc ('\n', stderr);
     }
 
   

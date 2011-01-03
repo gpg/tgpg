@@ -63,7 +63,7 @@ read_file (const char *fname, size_t *r_length)
 
       fp = stdin;
 #ifdef HAVE_DOSISH_SYSTEM
-      setmode ( fileno(fp) , O_BINARY );
+      setmode ( fileno (fp), O_BINARY );
 #endif
       buf = NULL;
       buflen = 0;
@@ -249,7 +249,7 @@ main (int argc, char **argv)
         {
           puts (
                 "Usage: " PGM " [OPTION] [FILE]\n"
-                "Simple tool to test the TGPG.\n\n"
+                "Simple tool to test TGPG.\n\n"
                 "  --verbose   enable extra informational output\n"
                 "  --debug     enable additional debug output\n"
                 "  --help      display this help and exit\n\n"

@@ -72,6 +72,7 @@ enum openpgp_cipher_algos
     CIPHER_ALGO_3DES   = 2,
     CIPHER_ALGO_CAST5  = 3,
     CIPHER_ALGO_AES    = 7,
+    CIPHER_ALGO_AES192 = 8,
     CIPHER_ALGO_AES256 = 9
   };
 
@@ -135,7 +136,7 @@ size_t _tgpg_canonsexp_len (const unsigned char *sexp, size_t length);
 /* Memory allocation should always be done using these macros.  */
 #define xtrymalloc(a)   malloc ((a))
 #define xtrycalloc(a,b) calloc ((a),(b)) 
-#define xfree(a)        free ((a))
+#define xfree(a)        do { void *a_ = (a); if (a_) free (a_); } while (0)
 
 /* Macro to wipe out the memory without allowing the compiler to
    remove it. */

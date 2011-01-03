@@ -105,8 +105,8 @@ get_mpi (char const **buffer, size_t *buflen, mpidesc_t mpi)
    R_DATA    = Stores a pointer to the begin of the packet content.
    R_DATALEN = Length of the packet content.  This value has already been
                checked to fit into the buffer as desibed by BUFLEN.
-   R_PKTTYPE = Received type of the packet.
-   R_NTOTAL  = Received the total number of bytes in this packet including 
+   R_PKTTYPE = Receives the type of the packet.
+   R_NTOTAL  = Receives the total number of bytes in this packet including 
                the header.
 */
 static int
@@ -178,7 +178,7 @@ next_packet (char const **bufptr, size_t *buflen,
       lenbytes = ((ctb&3)==3)? 0 : (1<<(ctb & 3));
       if (!lenbytes) /* No length bytes as used by old comressed packets.  */
         {
-          /* FIXME: we need to implemnted it. */
+          /* FIXME: we need to implement it.  */
           return TGPG_NOT_IMPL;
         }
       if (len < lenbytes)
@@ -247,7 +247,7 @@ _tgpg_identify_message (bufdesc_t msg, tgpg_msg_type_t *r_type)
 
         case PKT_SYMKEY_ENC:
           /* We do not yet support symmetrical encryption, thus we
-             need to skip these packets to and hope for public key
+             need to skip these packets and hope for public key
              encrypted packets.  */
           break;
 
@@ -324,23 +324,25 @@ parse_pubkey_enc_packet (const char *data, size_t datalen,
 
 
 /* Given an encrypted message, parse it and return the key information
-   required to actually decrypt it.  To achive this the function will
-   callback to the keystorage to see whether an encrypted key exists.
-   On success the key information is returned as well as a pointer to
-   the begin of the encrypted message data.  It may modify the
-   original message to remove partial length encoding and compact it
-   to one large packet.  On success the function returns an offset
-   to the begin of the actual encrypted data packet at R_START and the
-   information required to decrypt the message at R_KEYINFO and
-   R_ENCDAT.  The caller must provide these structures and allocate
-   space for at least MAX_PK_ENC items for R_ENCDAT.  The return
-   values are not defined on error.  */
+   required to actually decrypt it.  To achieve this the function will
+   callback to the keystorage to see whether a secret key exists.  On
+   success the key information is returned as well as a pointer to the
+   begin of the encrypted message data.  It may modify the original
+   message to remove partial length encoding and compact it to one
+   large packet.  On success the function returns an offset to the
+   begin of the actual encrypted data packet at R_START (right after
+   the MDC header), its length at R_LENGTH, the MDC algorithm at R_MDC
+   (0 for no MDC) and the information required to decrypt the message
+   at R_KEYINFO and R_ENCDAT.  The caller must provide these
+   structures and allocate space for at least MAX_PK_ENC items for
+   R_ENCDAT.  The return values are not defined on error.  */
 int
-_tgpg_parse_encrypted_message (bufdesc_t msg, size_t *r_start,
+_tgpg_parse_encrypted_message (bufdesc_t msg, int *r_mdc,
+                               size_t *r_start, size_t *r_length,
                                keyinfo_t r_keyinfo, mpidesc_t r_encdat )
 {
   int rc;
-  const char *image, *data;
+  const char *image, *data, *thisimage;
   size_t imagelen, datalen, n;
   int pkttype;
   int any_packets = 0;
@@ -352,6 +354,7 @@ _tgpg_parse_encrypted_message (bufdesc_t msg, size_t *r_start,
 
   while (image)
     {
+      thisimage = image;
       rc = next_packet (&image, &imagelen, &data, &datalen, &pkttype, &n);
       if (rc)
         return rc;
@@ -366,7 +369,7 @@ _tgpg_parse_encrypted_message (bufdesc_t msg, size_t *r_start,
           /* We do not yet support symmetrical encryption, thus we
              need to skip these packets to and hope for public key
              encrypted packets.  */
-          any_enc_seen = 1;;
+          any_enc_seen = 1;
           break;
 
         case PKT_PUBKEY_ENC:
@@ -392,7 +395,8 @@ _tgpg_parse_encrypted_message (bufdesc_t msg, size_t *r_start,
             return TGPG_NOT_IMPL; /* Old style symmetric message. */
           if (!got_key)
             return TGPG_NO_SECKEY;
-          /* TODO: compresss partial headers and return it. */
+          /* TODO: compresss partial headers. */
+          *r_start = thisimage - msg->image;
           
           return 0;
 

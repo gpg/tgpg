@@ -30,7 +30,7 @@
 /* Error codes.  */
 enum tgpg_error_codes
   {
-    /* FIXME: Assigned fixed values once we are ready. */
+    /* FIXME: Assign fixed values once we are ready. */
     TGPG_SYSERROR = -1,  /* The error is further described by ERRNO. */
     TGPG_NO_ERROR = 0,   /* No error.  Needs to have a value of 0.  */
     TGPG_NO_DATA,        /* No data for processing available. */
@@ -92,7 +92,7 @@ typedef struct tgpg_data_s *tgpg_data_t;
 int tgpg_new (tgpg_t *r_ctx);
 
 /* Release all resources associated with the given context.  Passing
-   NULL is allowed as a no operation.  */
+   NULL is allowed to do nothing.  */
 void tgpg_release (tgpg_t ctx);
 
 
@@ -101,7 +101,7 @@ int tgpg_data_new (tgpg_data_t *r_data);
 
 /* Create a new data buffer filled with LENGTH bytes starting from
    BUFFER.  If COPY is zero, copying is delayed until necessary, and
-   the data is taken from the original location when needed.  In theis
+   the data is taken from the original location when needed.  In this
    case the caller needs to make sure that he does not release or
    modify the memory at BUFFER as long as the returned handle is
    valid.  */

@@ -236,7 +236,7 @@ do_decryption (const unsigned char *protected, size_t protectedlen,
       return rc;
     }
   
-  /* Check that rge result is a valid S-expression. */
+  /* Check that the result is a valid S-expression.  */
   if ( (*outbuf != '(' && outbuf[1] != '(')
        || !(reallen = _tgpg_canonsexp_len (outbuf, protectedlen)) 
        || (reallen + blklen < protectedlen) )

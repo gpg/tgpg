@@ -49,15 +49,15 @@ tgpg_new (tgpg_t *r_ctx)
 void
 tgpg_release (tgpg_t ctx)
 {
-  if (ctx)
+  if (!ctx)
     return;
   xfree (ctx);
 }
 
 
 /* Make sure that BUF can be modified.  This is done by taking a copy
-   of the image. The function may return with an error which is then
-   an out of core condition.  */
+   of the image.  The function may return with an error to indicate an
+   out of core condition.  */
 int
 _tgpg_make_buffer_mutable (bufdesc_t buf)
 {
@@ -68,7 +68,7 @@ _tgpg_make_buffer_mutable (bufdesc_t buf)
   assert (buf->image);
 
   /* Make sure to allocate at least 1 one for the sake of broken
-     malloc implementations. */
+     malloc implementations.  */
   len = buf->length;
   if (!len)
     len = 1;
