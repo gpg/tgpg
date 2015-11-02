@@ -140,6 +140,28 @@ EOF
     exit 1
 fi
 
+# Check the git setup.
+if [ -d .git ]; then
+  CP="cp -a"
+  [ -z "${SILENT}" ] && CP="$CP -v"
+  if [ -f .git/hooks/pre-commit.sample -a ! -f .git/hooks/pre-commit ] ; then
+    [ -z "${SILENT}" ] && cat <<EOF
+*** Activating trailing whitespace git pre-commit hook. ***
+    To deactivate this pre-commit hook again move .git/hooks/pre-commit
+    and .git/hooks/pre-commit.sample out of the way.
+EOF
+      $CP .git/hooks/pre-commit.sample .git/hooks/pre-commit
+      chmod +x  .git/hooks/pre-commit
+  fi
+
+  if [ -f build-aux/git-hooks/commit-msg -a ! -f .git/hooks/commit-msg ] ; then
+      [ -z "${SILENT}" ] && cat <<EOF
+*** Activating commit log message check hook. ***
+EOF
+      $CP build-aux/git-hooks/commit-msg .git/hooks/commit-msg
+      chmod +x  .git/hooks/commit-msg
+  fi
+fi
 
 echo "Running aclocal -I m4  ${ACLOCAL_FLAGS:+$ACLOCAL_FLAGS }..."
 $ACLOCAL -I m4  $ACLOCAL_FLAGS
