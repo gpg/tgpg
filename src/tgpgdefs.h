@@ -7,15 +7,15 @@
    under the terms of the GNU General Public License as published by
    the Free Software Foundation; either version 2 of the License, or
    (at your option) any later version.
-  
+
    TPGP is distributed in the hope that it will be useful, but WITHOUT
    ANY WARRANTY; without even the implied warranty of MERCHANTABILITY
    or FITNESS FOR A PARTICULAR PURPOSE.  See the GNU General Public
    License for more details.
-  
+
    You should have received a copy of the GNU General Public License
    along with this program; if not, write to the Free Software
-   Foundation, Inc., 51 Franklin Street, Fifth Floor, Boston, 
+   Foundation, Inc., 51 Franklin Street, Fifth Floor, Boston,
    MA 02110-1301, USA.  */
 
 #ifndef TGPGDEFS_H
@@ -93,7 +93,7 @@ typedef struct tgpg_data_s *bufdesc_t;
 
 /* A descriptor for an MPI.  We do not store the actual value but let
    it point to a buffer, this avoids an extra copy.  */
-struct mpidesc_s 
+struct mpidesc_s
 {
   unsigned int nbits; /* The length of the MPI measured in bits.      */
   size_t valuelen;    /* The length of this value measured in bytes.  */
@@ -108,7 +108,7 @@ struct keyinfo_s
   /* The key ID as defined by OpenPGP.  */
   unsigned long keyid[2];
   /* The public key algorithm used. */
-  int pubkey_algo;  
+  int pubkey_algo;
 };
 typedef struct keyinfo_s *keyinfo_t;
 
@@ -132,10 +132,10 @@ size_t _tgpg_canonsexp_len (const unsigned char *sexp, size_t length);
 
 
 
-
+
 /* Memory allocation should always be done using these macros.  */
 #define xtrymalloc(a)   malloc ((a))
-#define xtrycalloc(a,b) calloc ((a),(b)) 
+#define xtrycalloc(a,b) calloc ((a),(b))
 #define xfree(a)        do { void *a_ = (a); if (a_) free (a_); } while (0)
 
 /* Macro to wipe out the memory without allowing the compiler to

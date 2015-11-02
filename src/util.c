@@ -7,15 +7,15 @@
    under the terms of the GNU General Public License as published by
    the Free Software Foundation; either version 2 of the License, or
    (at your option) any later version.
-  
+
    TPGP is distributed in the hope that it will be useful, but WITHOUT
    ANY WARRANTY; without even the implied warranty of MERCHANTABILITY
    or FITNESS FOR A PARTICULAR PURPOSE.  See the GNU General Public
    License for more details.
-  
+
    You should have received a copy of the GNU General Public License
    along with this program; if not, write to the Free Software
-   Foundation, Inc., 51 Franklin Street, Fifth Floor, Boston, 
+   Foundation, Inc., 51 Franklin Street, Fifth Floor, Boston,
    MA 02110-1301, USA.  */
 
 #include <config.h>
@@ -46,7 +46,7 @@ _tgpg_canonsexp_len (const unsigned char *sexp, size_t length)
     {
       if (length && count >= length)
         break; /* Expression longer than buffer.  */
-      
+
       if (datalen)
         {
           if (*p == ':')
@@ -59,7 +59,7 @@ _tgpg_canonsexp_len (const unsigned char *sexp, size_t length)
 	    }
           else if (*p >= '0' && *p <= '9')
             datalen = 10 * datalen + (*p - '0');
-          else 
+          else
             break; /* Bad length specification.  */
 	}
       else if (*p == '(')
@@ -69,7 +69,7 @@ _tgpg_canonsexp_len (const unsigned char *sexp, size_t length)
           level++;
 	}
       else if (*p == ')')
-        { 
+        {
           if (!level)
             break; /* No opening parenthesis.  */
           if (disphint)
@@ -81,13 +81,13 @@ _tgpg_canonsexp_len (const unsigned char *sexp, size_t length)
 	}
       else if (*p == '[')
         {
-          if (disphint) 
+          if (disphint)
             break;  /* Nested display hints are not allowed.  */
           disphint = p;
 	}
       else if (*p == ']')
         {
-          if ( !disphint ) 
+          if ( !disphint )
             break; /* Not in a display hint.  */
           disphint = NULL;
 	}
@@ -96,7 +96,7 @@ _tgpg_canonsexp_len (const unsigned char *sexp, size_t length)
           /* Note that leading zeroes are not allowed.  */
           datalen = (*p - '0');
 	}
-      else 
+      else
         break;  /* Unexpected characters  */
     }
 

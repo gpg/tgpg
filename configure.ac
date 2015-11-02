@@ -1,18 +1,18 @@
 # configure.ac - for TGPG
 # Copyright (C) 2007  g10 Code GmbH
-# 
+#
 # This file is part of TGPG.
-# 
+#
 # TGPG is free software; you can redistribute it and/or modify
 # it under the terms of the GNU General Public License as published by
 # the Free Software Foundation; either version 2 of the License, or
 # (at your option) any later version.
-# 
+#
 # TGPG is distributed in the hope that it will be useful,
 # but WITHOUT ANY WARRANTY; without even the implied warranty of
 # MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
 # GNU General Public License for more details.
-# 
+#
 # You should have received a copy of the GNU General Public License
 # along with this program; if not, write to the Free Software
 # Foundation, Inc., 51 Franklin Street, Fifth Floor, Boston,
@@ -49,7 +49,7 @@ AB_INIT
 AC_GNU_SOURCE
 
 # Some status variables.
-have_libgcrypt=no 
+have_libgcrypt=no
 
 
 
@@ -204,7 +204,7 @@ die=no
 if test "$have_libgcrypt" = "no"; then
    die=no
    AC_MSG_NOTICE([[
-***  
+***
 *** You need libgcrypt to build this program.
 **  This library is for example available at
 ***   ftp://ftp.gnupg.org/gcrypt/libgcrypt/
@@ -222,7 +222,7 @@ fi
 
 
 
-AC_CONFIG_FILES([ m4/Makefile 
+AC_CONFIG_FILES([ m4/Makefile
 Makefile
 src/Makefile
 doc/Makefile
@@ -233,7 +233,7 @@ AC_OUTPUT
 
 echo "
         TGPG v${VERSION} has been configured as follows:
-        
+
         Platform:  $host
 "
 

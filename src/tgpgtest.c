@@ -7,15 +7,15 @@
    under the terms of the GNU General Public License as published by
    the Free Software Foundation; either version 2 of the License, or
    (at your option) any later version.
-  
+
    TPGP is distributed in the hope that it will be useful, but WITHOUT
    ANY WARRANTY; without even the implied warranty of MERCHANTABILITY
    or FITNESS FOR A PARTICULAR PURPOSE.  See the GNU General Public
    License for more details.
-  
+
    You should have received a copy of the GNU General Public License
    along with this program; if not, write to the Free Software
-   Foundation, Inc., 51 Franklin Street, Fifth Floor, Boston, 
+   Foundation, Inc., 51 Franklin Street, Fifth Floor, Boston,
    MA 02110-1301, USA.  */
 
 #ifdef HAVE_CONFIG_H
@@ -56,7 +56,7 @@ read_file (const char *fname, size_t *r_length)
   FILE *fp;
   char *buf, *newbuf;
   size_t buflen;
-  
+
   if (!strcmp (fname, "-"))
     {
       size_t nread, bufsize = 0;
@@ -68,7 +68,7 @@ read_file (const char *fname, size_t *r_length)
       buf = NULL;
       buflen = 0;
 #define NCHUNK 8192
-      do 
+      do
         {
           bufsize += NCHUNK;
           if (!buf)
@@ -77,7 +77,7 @@ read_file (const char *fname, size_t *r_length)
             newbuf = realloc (buf, bufsize);
           if (!newbuf)
             {
-              fprintf (stderr, PGM": malloc or realloc failed: %s\n", 
+              fprintf (stderr, PGM": malloc or realloc failed: %s\n",
                        strerror (errno));
               free (buf);
               return NULL;
@@ -109,7 +109,7 @@ read_file (const char *fname, size_t *r_length)
                    fname, strerror (errno));
           return NULL;
         }
-  
+
       if (fstat (fileno(fp), &st))
         {
           fprintf (stderr, PGM": can't stat `%s': %s\n",
@@ -117,12 +117,12 @@ read_file (const char *fname, size_t *r_length)
           fclose (fp);
           return NULL;
         }
-      
+
       buflen = st.st_size;
       buf = malloc (buflen+1);
       if (!buf)
         {
-          fprintf (stderr, PGM": malloc failed (file too large?): %s\n", 
+          fprintf (stderr, PGM": malloc failed (file too large?): %s\n",
                    strerror (errno));
           fclose (fp);
           return NULL;
@@ -161,7 +161,7 @@ process_file (const char *fname)
     goto leave;
   if (verbose)
     fprintf (stderr, PGM": file `%s' of size %lu read\n",
-             fname, (unsigned long)inplen); 
+             fname, (unsigned long)inplen);
 
   rc = tgpg_data_new_from_mem (&inpdata, inpfile, inplen, 0);
   if (rc)
@@ -187,7 +187,7 @@ process_file (const char *fname)
                tgpg_strerror (rc));
       goto leave;
     }
-  
+
   rc = tgpg_new (&ctx);
   if (rc)
     {
@@ -206,7 +206,7 @@ process_file (const char *fname)
           goto leave;
         }
       /* fixme: Do something with the output.  */
-        
+
     }
 
  leave:
@@ -219,11 +219,11 @@ process_file (const char *fname)
 
 
 
-int 
+int
 main (int argc, char **argv)
 {
   int last_argc = -1;
- 
+
   if (argc)
     {
       argc--; argv++;
@@ -267,11 +267,11 @@ main (int argc, char **argv)
           verbose = debug = 1;
           argc--; argv++;
         }
-    }          
- 
+    }
+
   if (argc > 1)
     {
-      fprintf (stderr, "usage: " PGM 
+      fprintf (stderr, "usage: " PGM
                " [OPTION] [FILE] (try --help for more information)\n");
       exit (1);
     }

@@ -7,15 +7,15 @@
    under the terms of the GNU General Public License as published by
    the Free Software Foundation; either version 2 of the License, or
    (at your option) any later version.
-  
+
    TPGP is distributed in the hope that it will be useful, but WITHOUT
    ANY WARRANTY; without even the implied warranty of MERCHANTABILITY
    or FITNESS FOR A PARTICULAR PURPOSE.  See the GNU General Public
    License for more details.
-  
+
    You should have received a copy of the GNU General Public License
    along with this program; if not, write to the Free Software
-   Foundation, Inc., 51 Franklin Street, Fifth Floor, Boston, 
+   Foundation, Inc., 51 Franklin Street, Fifth Floor, Boston,
    MA 02110-1301, USA.  */
 
 #include <config.h>
@@ -25,7 +25,7 @@
 #include <assert.h>
 #include <errno.h>
 
-#include <gcrypt.h>  
+#include <gcrypt.h>
 
 #include "tgpgdefs.h"
 #include "cryptglue.h"
@@ -34,7 +34,7 @@
 #define HASH_BUFFERSIZE 1024
 
 
-
+
 /* Map gpg-error codes to tgpg error codes.  */
 static int
 maperr (gpg_error_t err)
@@ -44,7 +44,7 @@ maperr (gpg_error_t err)
 
 
 
-
+
 /*
 
      P U B K E Y   F u n c t i o n s
@@ -96,15 +96,15 @@ _tgpg_pk_decrypt (int algo, mpidesc_t seckey, mpidesc_t encdat,
 
   *r_plain = NULL;
   *r_plainlen = 0;
-  
+
   if (algo == PK_ALGO_RSA)
     {
       rc = gcry_sexp_build (&s_data, NULL, "(enc-val(rsa(a%b)))",
                             (int)encdat[0].valuelen, encdat[0].value);
       if (rc)
         return TGPG_INV_DATA;
-      
-      rc = gcry_sexp_build (&s_key, NULL, 
+
+      rc = gcry_sexp_build (&s_key, NULL,
 			    "(private-key(rsa(n%b)(e%b)(d%b)(p%b)(q%b)(u%b)))",
                             (int)seckey[0].valuelen, seckey[0].value,
                             (int)seckey[1].valuelen, seckey[1].value,
@@ -148,7 +148,7 @@ _tgpg_pk_decrypt (int algo, mpidesc_t seckey, mpidesc_t encdat,
 }
 
 
-
+
 /*
 
      C I P H E R   F u n c t i o n s
@@ -161,7 +161,7 @@ _tgpg_cipher_blocklen (int algo)
 {
   if (algo == CIPHER_ALGO_AES || algo == CIPHER_ALGO_AES192
       || algo == CIPHER_ALGO_AES256)
-    return 16; 
+    return 16;
   else
     return 8;
 }
@@ -169,7 +169,7 @@ _tgpg_cipher_blocklen (int algo)
 
 /* Core of the en- and decrypt functions.  With DO_ENCRYPT true an
    encryption is done, otherwise it will decrypt.  */
-static int 
+static int
 cipher_endecrypt (int do_encrypt,
                   int algo, enum cipher_modes mode,
                   const void *key, size_t keylen,
@@ -186,7 +186,7 @@ cipher_endecrypt (int do_encrypt,
     case CIPHER_MODE_CFB: mode = GCRY_CIPHER_MODE_CFB; break;
     default: return TGPG_BUG;
     }
-  
+
   err = gcry_cipher_open (&hd, algo, mode, 0);
   if (err)
     goto leave;
@@ -198,7 +198,7 @@ cipher_endecrypt (int do_encrypt,
     goto leave;
 
   err = gcry_cipher_decrypt (hd, outbuf, outbufsize, inbuf, inbuflen);
-  
+
  leave:
   gcry_cipher_close (hd);
   return maperr (err);
@@ -209,7 +209,7 @@ cipher_endecrypt (int do_encrypt,
    the algorithm to use, MODE, the encryption modus, KEY and KEYLEN
    describes the key and IV and IVLEN the IV.  Returns an error
    code.  */
-int 
+int
 _tgpg_cipher_decrypt (int algo, enum cipher_modes mode,
                       const void *key, size_t keylen,
                       const void *iv, size_t ivlen,
@@ -225,7 +225,7 @@ _tgpg_cipher_decrypt (int algo, enum cipher_modes mode,
    the algorithm to use, MODE, the encryption modus, KEY and KEYLEN
    describes the key and IV and IVLEN the IV.  Returns an error
    code.  */
-int 
+int
 _tgpg_cipher_encrypt (int algo, enum cipher_modes mode,
                       const void *key, size_t keylen,
                       const void *iv, size_t ivlen,
@@ -238,7 +238,7 @@ _tgpg_cipher_encrypt (int algo, enum cipher_modes mode,
 
 
 
-
+
 /*
 
      H A S H   F u n c t i o n s
@@ -268,9 +268,9 @@ _tgpg_hash_open (hash_t *rctx, int algo, unsigned int flags)
   gpg_error_t err;
   gcry_md_hd_t hd;
   hash_t ctx;
-  
+
   *rctx = NULL;
-  
+
   err = gcry_md_open (&hd, algo,
                       (flags & HASH_FLAG_SECURE)? GCRY_MD_FLAG_SECURE : 0);
   if (err)
@@ -320,7 +320,7 @@ _tgpg_hash_reset (hash_t ctx)
   gcry_md_reset (hd);
   ctx->bufferpos = 0;
 
-}  
+}
 
 /* Hash LENGTH bytes from BUFFER into the hash context CTX.  */
 void
@@ -335,7 +335,7 @@ _tgpg_hash_write (hash_t ctx, const void *buffer, size_t length)
     }
   if (buffer && length)
     gcry_md_write (hd, buffer, length);
-} 
+}
 
 /* Finalize the hash digest and return it.  The returned value is
    valid as long as the context is valid and no hash_reset has been

@@ -1,7 +1,7 @@
                         Tiny GNU Privacy Guard
                       ==========================
                             Version 0.0.0
-                                
+
 
 This is an OpenPGP implementation targeted to small devices and comes
 with a couple of restrictions.  It does not feature a key management
@@ -11,7 +11,7 @@ GPGME.
 
 
 
-Requirements: 
+Requirements:
 
   sizeof (char) == 8
   sizeof (int) >= 16

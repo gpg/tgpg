@@ -7,15 +7,15 @@
    under the terms of the GNU General Public License as published by
    the Free Software Foundation; either version 2 of the License, or
    (at your option) any later version.
-  
+
    TPGP is distributed in the hope that it will be useful, but WITHOUT
    ANY WARRANTY; without even the implied warranty of MERCHANTABILITY
    or FITNESS FOR A PARTICULAR PURPOSE.  See the GNU General Public
    License for more details.
-  
+
    You should have received a copy of the GNU General Public License
    along with this program; if not, write to the Free Software
-   Foundation, Inc., 51 Franklin Street, Fifth Floor, Boston, 
+   Foundation, Inc., 51 Franklin Street, Fifth Floor, Boston,
    MA 02110-1301, USA.  */
 
 #include <config.h>
@@ -38,7 +38,7 @@ decrypt_session_key (keyinfo_t keyinfo, mpidesc_t encdat,
   mpidesc_t seckey;
   char *plain;
   size_t plainlen, n;
-  
+
   *r_seskey = NULL;
   *r_seskeylen = 0;
   *r_algo = 0;
@@ -73,7 +73,7 @@ decrypt_session_key (keyinfo_t keyinfo, mpidesc_t encdat,
       else
         {
           /* Skip random part.  */
-          for (n=1; n < plainlen && plain[n]; n++) 
+          for (n=1; n < plainlen && plain[n]; n++)
             ;
           n++; /* Skip the terminating 0.  */
           /* PLAIN+N -> <algobyte> <keybytes> <2byteschecksum> */
@@ -85,7 +85,7 @@ decrypt_session_key (keyinfo_t keyinfo, mpidesc_t encdat,
               size_t seskeylen;
               char *seskey;
               unsigned short csum, csum2;
-              
+
               algo = ((unsigned char*)plain)[n++];
               seskey = plain + n;
               seskeylen = plainlen - n - 2;
@@ -93,7 +93,7 @@ decrypt_session_key (keyinfo_t keyinfo, mpidesc_t encdat,
                       | ((unsigned char *)plain)[plainlen-1]);
               for (csum2=0, n=0; n < seskeylen; n++ )
                 csum2 = ((csum2 + ((unsigned char *)seskey)[n]) & 0xffff);
-              if (csum != csum2) 
+              if (csum != csum2)
                 rc = TGPG_WRONG_KEY;
               else if (!(*r_seskey = xtrymalloc (seskeylen)))
                 rc = TGPG_SYSERROR;
@@ -110,7 +110,7 @@ decrypt_session_key (keyinfo_t keyinfo, mpidesc_t encdat,
   if (plain)
     {
       wipememory (plain, plainlen);
-      xfree (plain);  
+      xfree (plain);
     }
 
   return rc;
@@ -154,14 +154,14 @@ tgpg_decrypt (tgpg_t ctx, tgpg_data_t cipher, tgpg_data_t plain)
     {
       size_t n;
       int i;
-      
+
       fprintf (stderr, "DBG: algo: %d session key: ", algo);
       for (i=0; i < seskeylen; i++)
         fprintf (stderr, "%02X", ((unsigned char*)seskey)[i]);
       putc ('\n', stderr);
       fprintf (stderr, "DBG: pky_encrypted at off %lu rest of data:\n",
                (unsigned long)startoff);
-      
+
       for (n=startoff, i=0; n < cipher->length; n++)
         {
           fprintf (stderr, "%02X", ((unsigned char*)cipher->image)[n]);
@@ -172,7 +172,7 @@ tgpg_decrypt (tgpg_t ctx, tgpg_data_t cipher, tgpg_data_t plain)
         putc ('\n', stderr);
     }
 
-  
+
  leave:
   xfree (encdat);
   xfree (keyinfo);

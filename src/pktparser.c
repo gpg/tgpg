@@ -7,15 +7,15 @@
    under the terms of the GNU General Public License as published by
    the Free Software Foundation; either version 2 of the License, or
    (at your option) any later version.
-  
+
    TPGP is distributed in the hope that it will be useful, but WITHOUT
    ANY WARRANTY; without even the implied warranty of MERCHANTABILITY
    or FITNESS FOR A PARTICULAR PURPOSE.  See the GNU General Public
    License for more details.
-  
+
    You should have received a copy of the GNU General Public License
    along with this program; if not, write to the Free Software
-   Foundation, Inc., 51 Franklin Street, Fifth Floor, Boston, 
+   Foundation, Inc., 51 Franklin Street, Fifth Floor, Boston,
    MA 02110-1301, USA.  */
 
 #include <config.h>
@@ -106,7 +106,7 @@ get_mpi (char const **buffer, size_t *buflen, mpidesc_t mpi)
    R_DATALEN = Length of the packet content.  This value has already been
                checked to fit into the buffer as desibed by BUFLEN.
    R_PKTTYPE = Receives the type of the packet.
-   R_NTOTAL  = Receives the total number of bytes in this packet including 
+   R_NTOTAL  = Receives the total number of bytes in this packet including
                the header.
 */
 static int
@@ -123,11 +123,11 @@ next_packet (char const **bufptr, size_t *buflen,
   len = *buflen;
   if (!len)
     return TGPG_NO_DATA;
-  
+
   ctb = get_u8 (buf++); len--;
   if ( !(ctb & 0x80) )
     return TGPG_INV_PKT;  /* The CTB is not valid.  */
-  
+
   pktlen = 0;
   if ((ctb & 0x40))  /* New style CTB.  */
     {
@@ -138,7 +138,7 @@ next_packet (char const **bufptr, size_t *buflen,
       if ( c < 192 )
         pktlen = c;
       else if ( c < 224 )
-        { 
+        {
           pktlen = (c - 192) * 256;
           if (!len)
             return TGPG_INV_PKT; /* Second length byte missing.  */
@@ -243,7 +243,7 @@ _tgpg_identify_message (bufdesc_t msg, tgpg_msg_type_t *r_type)
         {
         case PKT_ENCRYPTED:
           /* We do not support old style symmetric encrypted messages.  */
-          return TGPG_NOT_IMPL;  
+          return TGPG_NOT_IMPL;
 
         case PKT_SYMKEY_ENC:
           /* We do not yet support symmetrical encryption, thus we
@@ -303,12 +303,12 @@ parse_pubkey_enc_packet (const char *data, size_t datalen,
 
   if (*data != 2 && *data != 3)
     return TGPG_INV_PKT;  /* We require packet version 2 or 3.  */
-  ki->keyid[1] = get_u32 (data+1);         
-  ki->keyid[0] = get_u32 (data+5);         
+  ki->keyid[1] = get_u32 (data+1);
+  ki->keyid[0] = get_u32 (data+5);
   ki->pubkey_algo = get_u8 (data+9);
   data += 10; datalen -= 10;
   nenc = _tgpg_pk_get_nenc (ki->pubkey_algo);
-  assert (nenc <= MAX_PK_NENC); 
+  assert (nenc <= MAX_PK_NENC);
   if (!nenc)
     return TGPG_INV_ALGO;
   for (idx=0; idx < nenc; idx++)
@@ -397,7 +397,7 @@ _tgpg_parse_encrypted_message (bufdesc_t msg, int *r_mdc,
             return TGPG_NO_SECKEY;
           /* TODO: compresss partial headers. */
           *r_start = thisimage - msg->image;
-          
+
           return 0;
 
         default:

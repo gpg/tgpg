@@ -7,16 +7,16 @@
    under the terms of the GNU General Public License as published by
    the Free Software Foundation; either version 2 of the License, or
    (at your option) any later version.
-  
+
    TPGP is distributed in the hope that it will be useful, but WITHOUT
    ANY WARRANTY; without even the implied warranty of MERCHANTABILITY
    or FITNESS FOR A PARTICULAR PURPOSE.  See the GNU General Public
    License for more details.
-  
+
    You should have received a copy of the GNU General Public License
    along with this program; if not, write to the Free Software
-   Foundation, Inc., 51 Franklin Street, Fifth Floor, Boston, 
-   MA 02110-1301, USA.  
+   Foundation, Inc., 51 Franklin Street, Fifth Floor, Boston,
+   MA 02110-1301, USA.
 
 
    Note: This code has orginally been written for NewPG and then in
@@ -41,7 +41,7 @@
 
 /* A table containing the information needed to create a protected
    private key */
-static struct 
+static struct
 {
   const char *algo;
   const char *parmlist;
@@ -83,7 +83,7 @@ sskip (unsigned char const **buf, int *depth)
   const unsigned char *s = *buf;
   size_t n;
   int d = *depth;
-  
+
   while (d > 0)
     {
       if (*s == '(')
@@ -132,7 +132,7 @@ smatch (unsigned char const **buf, size_t buflen, const char *token)
 
 /* Calculate the MIC for a private key S-Exp.  SHA1HASH should point
    to a 20 byte buffer.  */
-static int 
+static int
 calculate_mic (const unsigned char *plainkey, unsigned char *sha1hash)
 {
   const unsigned char *hash_begin, *hash_end;
@@ -145,16 +145,16 @@ calculate_mic (const unsigned char *plainkey, unsigned char *sha1hash)
   s++;
   n = snext (&s);
   if (!n)
-    return TGPG_INV_DATA; 
+    return TGPG_INV_DATA;
   if (!smatch (&s, n, "private-key"))
-    return TGPG_UNEXP_DATA; 
+    return TGPG_UNEXP_DATA;
   if (*s != '(')
     return TGPG_UNEXP_DATA;
   hash_begin = s;
   s++;
   n = snext (&s);
   if (!n)
-    return TGPG_INV_DATA; 
+    return TGPG_INV_DATA;
   s += n; /* Skip the algorithm name. */
 
   while (*s == '(')
@@ -162,18 +162,18 @@ calculate_mic (const unsigned char *plainkey, unsigned char *sha1hash)
       s++;
       n = snext (&s);
       if (!n)
-        return TGPG_INV_DATA; 
+        return TGPG_INV_DATA;
       s += n;
       n = snext (&s);
       if (!n)
-        return TGPG_INV_DATA; 
+        return TGPG_INV_DATA;
       s += n;
       if ( *s != ')' )
-        return TGPG_INV_DATA; 
+        return TGPG_INV_DATA;
       s++;
     }
   if (*s != ')')
-    return TGPG_INV_DATA; 
+    return TGPG_INV_DATA;
   s++;
   hash_end = s;
 
@@ -188,8 +188,8 @@ calculate_mic (const unsigned char *plainkey, unsigned char *sha1hash)
 /* Do the actual decryption and check the return list for
    consistency.  */
 static int
-do_decryption (const unsigned char *protected, size_t protectedlen, 
-               const char *passphrase, 
+do_decryption (const unsigned char *protected, size_t protectedlen,
+               const char *passphrase,
                const unsigned char *s2ksalt, unsigned long s2kcount,
                const unsigned char *iv, size_t ivlen,
                unsigned char **result)
@@ -210,7 +210,7 @@ do_decryption (const unsigned char *protected, size_t protectedlen,
   {
     unsigned char *key;
     size_t keylen;
-    
+
     keylen = PROT_CIPHER_KEYLEN;
     key = xtrymalloc (keylen);
     if (!key)
@@ -235,10 +235,10 @@ do_decryption (const unsigned char *protected, size_t protectedlen,
       xfree (outbuf);
       return rc;
     }
-  
+
   /* Check that the result is a valid S-expression.  */
   if ( (*outbuf != '(' && outbuf[1] != '(')
-       || !(reallen = _tgpg_canonsexp_len (outbuf, protectedlen)) 
+       || !(reallen = _tgpg_canonsexp_len (outbuf, protectedlen))
        || (reallen + blklen < protectedlen) )
     {
       xfree (outbuf);
@@ -256,7 +256,7 @@ do_decryption (const unsigned char *protected, size_t protectedlen,
    buffer SHA1HASH. */
 static int
 merge_lists (const unsigned char *protectedkey,
-             size_t replacepos, 
+             size_t replacepos,
              const unsigned char *cleartext,
              unsigned char *sha1hash,
              unsigned char **result, size_t *resultlen)
@@ -266,7 +266,7 @@ merge_lists (const unsigned char *protectedkey,
   const unsigned char *s;
   const unsigned char *startpos, *endpos;
   int i;
-  
+
   *result = NULL;
   *resultlen = 0;
 
@@ -329,7 +329,7 @@ merge_lists (const unsigned char *protectedkey,
     goto invalid_sexp;
   n = snext (&s);
   if (!smatch (&s, n, "sha1"))
-    goto invalid_sexp; 
+    goto invalid_sexp;
   n = snext (&s);
   if (n != 20)
     goto invalid_sexp;
@@ -341,7 +341,7 @@ merge_lists (const unsigned char *protectedkey,
   /* Append the parameter list. */
   memcpy (p, startpos, endpos - startpos);
   p += endpos - startpos;
-  
+
   /* Skip the protected list element from the original list. */
   s = protectedkey + replacepos;
   assert (*s == '(');
@@ -374,7 +374,7 @@ merge_lists (const unsigned char *protectedkey,
 
 /* Check whether SECKEY is a protected secret key and return 0 in this
    case.  */
-int 
+int
 _tgpg_is_protected (const unsigned char *seckey)
 {
   const unsigned char *s;
@@ -386,9 +386,9 @@ _tgpg_is_protected (const unsigned char *seckey)
   s++;
   n = snext (&s);
   if (!n)
-    return TGPG_INV_DATA; 
+    return TGPG_INV_DATA;
   if (!smatch (&s, n, "protected-private-key"))
-    return 0; 
+    return 0;
   return TGPG_NO_DATA;
 }
 
@@ -396,7 +396,7 @@ _tgpg_is_protected (const unsigned char *seckey)
 
 /* Unprotect the key encoded in canonical format.  We assume a valid
    S-expression here. */
-int 
+int
 _tgpg_unprotect (const unsigned char *protectedkey, const char *passphrase,
                  unsigned char **result, size_t *resultlen)
 {
@@ -419,15 +419,15 @@ _tgpg_unprotect (const unsigned char *protectedkey, const char *passphrase,
   s++;
   n = snext (&s);
   if (!n)
-    return TGPG_INV_DATA; 
+    return TGPG_INV_DATA;
   if (!smatch (&s, n, "protected-private-key"))
-    return TGPG_UNEXP_DATA; 
+    return TGPG_UNEXP_DATA;
   if (*s != '(')
     return TGPG_UNEXP_DATA;
   s++;
   n = snext (&s);
   if (!n)
-    return TGPG_INV_DATA; 
+    return TGPG_INV_DATA;
 
   for (infidx=0; (protect_info[infidx].algo
                   && !smatch (&s, n, protect_info[infidx].algo)); infidx++)
@@ -437,7 +437,7 @@ _tgpg_unprotect (const unsigned char *protectedkey, const char *passphrase,
 
   /* Now find the list with the protected information.  Here is an
      example for such a list:
-     (protected openpgp-s2k3-sha1-aes-cbc 
+     (protected openpgp-s2k3-sha1-aes-cbc
         ((sha1 <salt> <count>) <Initialization_Vector>)
         <encrypted_data>)
    */
@@ -449,7 +449,7 @@ _tgpg_unprotect (const unsigned char *protectedkey, const char *passphrase,
       s++;
       n = snext (&s);
       if (!n)
-        return TGPG_INV_DATA; 
+        return TGPG_INV_DATA;
       if (smatch (&s, n, "protected"))
         break;
       s += n;
@@ -461,7 +461,7 @@ _tgpg_unprotect (const unsigned char *protectedkey, const char *passphrase,
   /* Found. */
   n = snext (&s);
   if (!n)
-    return TGPG_INV_DATA; 
+    return TGPG_INV_DATA;
   if (!smatch (&s, n, "openpgp-s2k3-sha1-" PROT_CIPHER_STRING "-cbc"))
     return TGPG_NOT_IMPL;
   if (*s != '(' || s[1] != '(')
@@ -469,7 +469,7 @@ _tgpg_unprotect (const unsigned char *protectedkey, const char *passphrase,
   s += 2;
   n = snext (&s);
   if (!n)
-    return TGPG_INV_DATA; 
+    return TGPG_INV_DATA;
   if (!smatch (&s, n, "sha1"))
     return TGPG_NOT_IMPL;
   n = snext (&s);
@@ -501,8 +501,8 @@ _tgpg_unprotect (const unsigned char *protectedkey, const char *passphrase,
   s++;
   n = snext (&s);
   if (!n)
-    return TGPG_INV_DATA; 
-  
+    return TGPG_INV_DATA;
+
   rc = do_decryption (s, n,
                       passphrase, s2ksalt, s2kcount,
                       iv, 16,

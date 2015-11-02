@@ -7,15 +7,15 @@
    under the terms of the GNU General Public License as published by
    the Free Software Foundation; either version 2 of the License, or
    (at your option) any later version.
-  
+
    TPGP is distributed in the hope that it will be useful, but WITHOUT
    ANY WARRANTY; without even the implied warranty of MERCHANTABILITY
    or FITNESS FOR A PARTICULAR PURPOSE.  See the GNU General Public
    License for more details.
-  
+
    You should have received a copy of the GNU General Public License
    along with this program; if not, write to the Free Software
-   Foundation, Inc., 51 Franklin Street, Fifth Floor, Boston, 
+   Foundation, Inc., 51 Franklin Street, Fifth Floor, Boston,
    MA 02110-1301, USA.  */
 
 #include <config.h>
@@ -92,7 +92,7 @@ tgpg_data_new (tgpg_data_t *r_data)
   bufdesc = xtrycalloc (1, sizeof *bufdesc);
   if (!bufdesc)
     return TGPG_SYSERROR;
-  
+
   bufdesc->length = 0;
   bufdesc->image = "";
 
@@ -122,7 +122,7 @@ tgpg_data_new_from_mem (tgpg_data_t *r_data,
   bufdesc = xtrycalloc (1, sizeof *bufdesc);
   if (!bufdesc)
     return TGPG_SYSERROR;
-  
+
   bufdesc->length = length;
   bufdesc->image = buffer;
 
@@ -135,7 +135,7 @@ tgpg_data_new_from_mem (tgpg_data_t *r_data,
           return rc;
         }
     }
-  
+
   *r_data = bufdesc;
   return 0;
 }
