@@ -125,8 +125,10 @@ tgpg_decrypt (tgpg_t ctx, tgpg_data_t cipher, tgpg_data_t plain)
 {
   int rc;
   size_t startoff;
+  size_t length;
   keyinfo_t keyinfo;
   mpidesc_t encdat;
+  int mdc;
   int algo;
   char *seskey;
   size_t seskeylen;
@@ -141,7 +143,9 @@ tgpg_decrypt (tgpg_t ctx, tgpg_data_t cipher, tgpg_data_t plain)
       return TGPG_SYSERROR;
     }
 
-  rc = _tgpg_parse_encrypted_message (cipher, &startoff, keyinfo, encdat);
+  rc = _tgpg_parse_encrypted_message (cipher, &mdc,
+                                      &startoff, &length,
+                                      keyinfo, encdat);
   if (rc)
     goto leave;
 
