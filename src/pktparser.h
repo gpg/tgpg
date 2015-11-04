@@ -27,4 +27,10 @@ int _tgpg_parse_encrypted_message (bufdesc_t msg, int *r_mdc,
                                    size_t *r_start, size_t *r_length,
                                    keyinfo_t r_keyinfo, mpidesc_t r_encdat);
 
+int _tgpg_parse_plaintext_message (bufdesc_t msg,
+				   unsigned char *r_format,
+				   char *r_filename,
+				   time_t *r_date,
+				   size_t *r_start,
+				   size_t *r_length);
 #endif /*PKTPARSER_H*/

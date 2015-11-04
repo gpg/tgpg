@@ -413,3 +413,59 @@ _tgpg_parse_encrypted_message (bufdesc_t msg, int *r_mdc,
 
   return any_enc_seen? TGPG_INV_MSG : TGPG_NO_DATA;
 }
+
+/* Given an plaintext message, parse it and return any payload and
+   metadata associated with it.  On success the function returns the
+   format in R_FORMAT, the original filename in R_FILENAME (which must
+   hold at least 256 bytes and will be zero-terminated), a date in
+   R_DATE, an offset to the begin of the actual plaintext data packet
+   at R_START, and its length at R_LENGTH.  The return values are not
+   defined on error.  */
+int
+_tgpg_parse_plaintext_message (bufdesc_t msg,
+                               unsigned char *r_format,
+                               char *r_filename,
+                               time_t *r_date,
+                               size_t *r_start,
+                               size_t *r_length)
+{
+  int rc;
+  const char *image, *data;
+  size_t imagelen, datalen, n;
+  int pkttype;
+
+  image = msg->image;
+  imagelen = msg->length;
+
+  while (image)
+    {
+      rc = next_packet (&image, &imagelen, &data, &datalen, &pkttype, &n);
+      if (rc)
+        return rc;
+
+      switch (pkttype)
+        {
+        case PKT_PLAINTEXT:
+          {
+            size_t len;
+
+            *r_format = data[0];
+            len = get_u8 (&data[1]);
+
+            memcpy (r_filename, &data[2], len);
+            r_filename[len] = 0;
+
+            *r_date = get_u32 (&data[2 + len]);
+            *r_start = &data[2 + len + 4] - msg->image;
+            *r_length = datalen - (2 + len + 4);
+          }
+          break;
+
+        default:
+          /* We don't expect any other packets. */
+          return TGPG_UNEXP_PKT;
+        }
+    }
+
+  return 0;
+}
