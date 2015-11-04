@@ -225,6 +225,7 @@ fi
 
 AC_CONFIG_FILES([ m4/Makefile
 Makefile
+tools/Makefile
 src/Makefile
 doc/Makefile
 tests/Makefile

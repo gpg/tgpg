@@ -1,5 +1,5 @@
-# Makefile.am - Top level makefile.
-# Copyright (C) 2007  g10 Code GmbH
+# Makefile.am - for tgpg/tools
+# Copyright (C) 2015 g10 Code GmbH
 #
 # This file is part of TGPG.
 #
@@ -20,17 +20,9 @@
 
 ## Process this file with automake to produce Makefile.in
 
-ACLOCAL_AMFLAGS = -I m4
-AUTOMAKE_OPTIONS = dist-bzip2
+AM_CFLAGS = $(LIBGCRYPT_CFLAGS)
 
-EXTRA_DIST = autogen.sh README.SVN
+noinst_PROGRAMS = tgpg-keystore
 
-SUBDIRS = m4 tools src doc tests
-
-dist-hook:
-	echo "$(VERSION)" > $(distdir)/VERSION
-
-
-
-
-
+tgpg_keystore_SOURCES  = tgpg-keystore.c
+tgpg_keystore_LDADD = $(LIBGCRYPT_LIBS)
