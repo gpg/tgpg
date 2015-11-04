@@ -155,6 +155,24 @@ tgpg_data_release (tgpg_data_t data)
   xfree (data);
 }
 
+/* Return a pointer to the actual data, and its length.  Note that the
+   data is not copied, and the pointer will turn stale if the DATA
+   object is modified or destroyed.  */
+void
+tgpg_data_get (tgpg_data_t data, const char **ptr, size_t *length)
+{
+  if (!data)
+    {
+      *ptr = NULL;
+      *length = 0;
+    }
+  else
+    {
+      *ptr = data->image;
+      *length = data->length;
+    }
+}
+
 
 /* Given a data object holding an OpenPGP message, identify the type
    of the message.  On success R_TYPE will receive on the TGPG_MSG

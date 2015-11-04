@@ -116,6 +116,12 @@ int tgpg_data_new_from_mem (tgpg_data_t *r_data,
    after this function has returned.  */
 void tgpg_data_release (tgpg_data_t data);
 
+/* Return a pointer to the actual data, and its length.  Note that the
+   data is not copied, and the pointer will turn stale if the DATA
+   object is modified or destroyed.  */
+void
+tgpg_data_get (tgpg_data_t data, const char **ptr, size_t *length);
+
 /* Given a data object holding an OpenPGP message, identify the type
    of the message.  On success R_TYPE will receive on the TGPG_MSG
    values. R_TYPE may be passed as NULL to just run a basic check. */
