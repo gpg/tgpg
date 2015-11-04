@@ -63,7 +63,8 @@ typedef enum
     TGPG_MSG_ENCRYPTED = 2,   /* The message is encrypted.  */
     TGPG_MSG_SIGNED = 3,      /* The message is signed.  */
     TGPG_MSG_CLEARSIGNED = 4, /* The message is clearsigned.  */
-    TGPG_MSG_KEYDATA = 5      /* The message contains key data.  */
+    TGPG_MSG_KEYDATA = 5,     /* The message contains key data.  */
+    TGPG_MSG_PLAINTEXT = 6,   /* The message contains plain text data.  */
   }
 tgpg_msg_type_t;
 

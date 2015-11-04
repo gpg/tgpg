@@ -263,6 +263,10 @@ _tgpg_identify_message (bufdesc_t msg, tgpg_msg_type_t *r_type)
           return 0;
 
         case PKT_PLAINTEXT:
+          /* This is a plaintext message (a Literal Data Packet).  */
+          *r_type = TGPG_MSG_PLAINTEXT;
+          return 0;
+
         case PKT_COMPRESSED:
           /* We do not support simple compressed or plaintext OpenPGP
              messages. */
