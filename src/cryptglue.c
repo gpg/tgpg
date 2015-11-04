@@ -197,7 +197,9 @@ cipher_endecrypt (int do_encrypt,
   if (err)
     goto leave;
 
-  err = gcry_cipher_decrypt (hd, outbuf, outbufsize, inbuf, inbuflen);
+  err = \
+    (do_encrypt ? gcry_cipher_encrypt : gcry_cipher_decrypt)    \
+      (hd, outbuf, outbufsize, inbuf, inbuflen);
 
  leave:
   gcry_cipher_close (hd);
