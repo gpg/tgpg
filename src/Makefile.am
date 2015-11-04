@@ -36,10 +36,10 @@ tgpg_source =  \
         decrypt.c
 
 
-tgpgtest_SOURCES  = tgpgtest.c $(tgpg_source)
+tgpgtest_SOURCES  = tgpgtest.c keystore-static.c $(tgpg_source)
 
 tgpgtest_LDADD = $(LIBGCRYPT_LIBS)
 
-
-
-
+keystore-static.c: keystore-static.c.sample
+	@echo Using empty key store.  See tools/tgpg-keystore.
+	cp -v "$<" "$@"
