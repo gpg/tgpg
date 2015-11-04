@@ -21,6 +21,17 @@
 #ifndef TGPGDEFS_H
 #define TGPGDEFS_H
 
+#include <config.h>
+
+#if HAVE_STDINT_H
+# include <stdint.h>
+#endif
+#if defined UINT32_MAX || defined uint32_t
+typedef uint32_t keyid_t;
+#else
+# error "No uint32_t."
+#endif
+
 /* Include the public header. */
 #include "tgpg.h"
 
@@ -106,7 +117,7 @@ typedef struct mpidesc_s *mpidesc_t;
 struct keyinfo_s
 {
   /* The key ID as defined by OpenPGP.  */
-  unsigned long keyid[2];
+  uint32_t keyid[2];
   /* The public key algorithm used. */
   int pubkey_algo;
 };
