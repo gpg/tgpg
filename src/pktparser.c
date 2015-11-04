@@ -342,7 +342,7 @@ _tgpg_parse_encrypted_message (bufdesc_t msg, int *r_mdc,
                                keyinfo_t r_keyinfo, mpidesc_t r_encdat )
 {
   int rc;
-  const char *image, *data, *thisimage;
+  const char *image, *data;
   size_t imagelen, datalen, n;
   int pkttype;
   int any_packets = 0;
@@ -354,7 +354,6 @@ _tgpg_parse_encrypted_message (bufdesc_t msg, int *r_mdc,
 
   while (image)
     {
-      thisimage = image;
       rc = next_packet (&image, &imagelen, &data, &datalen, &pkttype, &n);
       if (rc)
         return rc;
@@ -396,7 +395,9 @@ _tgpg_parse_encrypted_message (bufdesc_t msg, int *r_mdc,
           if (!got_key)
             return TGPG_NO_SECKEY;
           /* TODO: compresss partial headers. */
-          *r_start = thisimage - msg->image;
+
+          *r_start = data - msg->image;
+          *r_length = datalen;
 
           return 0;
 
