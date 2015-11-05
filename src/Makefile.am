@@ -22,9 +22,11 @@
 
 AM_CFLAGS = $(LIBGCRYPT_CFLAGS)
 
-noinst_PROGRAMS = tgpgtest
+include_HEADERS = tgpg.h
 
-tgpg_source =  \
+lib_LTLIBRARIES = libtgpg.la
+
+libtgpg_la_SOURCES = \
         tgpg.c tgpg.h tgpgdefs.h \
 	cryptglue.c cryptglue.h \
         keystore.c  keystore.h \
@@ -34,12 +36,3 @@ tgpg_source =  \
 	util.c \
 	strerror.c \
         decrypt.c
-
-
-tgpgtest_SOURCES  = tgpgtest.c keystore-static.c $(tgpg_source)
-
-tgpgtest_LDADD = $(LIBGCRYPT_LIBS)
-
-keystore-static.c: keystore-static.c.sample
-	@echo Using empty key store.  See tools/tgpg-keystore.
-	cp -v "$<" "$@"

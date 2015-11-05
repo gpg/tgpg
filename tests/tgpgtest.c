@@ -33,7 +33,7 @@
 
 #include <gcrypt.h>
 
-#include "tgpg.h"  /* Obviously we only include the public header. */
+#include <tgpg.h>  /* Obviously we only include the public header. */
 
 #define PGM "tgpgtest"
 #ifndef PACKAGE_BUGREPORT

@@ -22,7 +22,7 @@
 
 AM_CFLAGS = $(LIBGCRYPT_CFLAGS)
 
-noinst_PROGRAMS = tgpg-keystore
+bin_PROGRAMS = tgpg-keystore
 
 tgpg_keystore_SOURCES  = tgpg-keystore.c
 tgpg_keystore_LDADD = $(LIBGCRYPT_LIBS)
