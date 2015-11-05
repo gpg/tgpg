@@ -29,7 +29,7 @@ src/libtgpg-config
 src/libtgpg.la
 tests/Makefile
 tests/gpghome
-tests/keystore-static.c
+tests/keystore.c
 tests/test*
 tests/tgpgtest
 tools/tgpg-keystore

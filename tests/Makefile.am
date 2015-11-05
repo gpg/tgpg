@@ -25,7 +25,7 @@ AM_CFLAGS = $(LIBGCRYPT_CFLAGS)
 noinst_PROGRAMS = tgpgtest
 
 # The test driver.
-tgpgtest_SOURCES  = tgpgtest.c keystore-static.c
+tgpgtest_SOURCES  = tgpgtest.c keystore.c
 tgpgtest_CFLAGS = -I$(top_srcdir)/src
 tgpgtest_LDADD = $(LIBGCRYPT_LIBS) -L../src -ltgpg
 
@@ -41,7 +41,7 @@ gpghome: key.script
 	chmod 700 "$@"
 	$(GPG) --homedir "$@" $(GPGFLAGS) --gen-key --batch '$<'
 
-keystore-static.c: $(GPGHOME) ../tools/tgpg-keystore
+keystore.c: $(GPGHOME) ../tools/tgpg-keystore
 	../tools/tgpg-keystore \
 		`$(GPGX) | grep '^sub' | cut -d: -f5` \
 		"$<"/private-keys-v1.d/`$(GPGX) | grep '^grp' | tail -n 1 | cut -d: -f10`.key >"$@"
