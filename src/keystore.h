@@ -23,17 +23,9 @@
 
 #include "tgpgdefs.h"
 
-struct keytable
-{
-  int algo;
-  unsigned long keyid_high;
-  unsigned long keyid_low;
-  struct mpidesc_s mpis[6];
-};
-
 int _tgpg_have_secret_key (keyinfo_t ki);
-int _tgpg_get_secret_key (keyinfo_t ki, mpidesc_t *r_seckey);
-void _tgpg_free_secret_key (mpidesc_t seckey);
+int _tgpg_get_secret_key (keyinfo_t ki, tgpg_mpi_t *r_seckey);
+void _tgpg_free_secret_key (tgpg_mpi_t seckey);
 
 
 #endif /*KEYSTORE_H*/

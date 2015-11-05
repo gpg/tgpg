@@ -32,11 +32,11 @@
 
 
 static int
-decrypt_session_key (keyinfo_t keyinfo, mpidesc_t encdat,
+decrypt_session_key (keyinfo_t keyinfo, tgpg_mpi_t encdat,
                      int *r_algo, char **r_seskey, size_t *r_seskeylen)
 {
   int rc;
-  mpidesc_t seckey;
+  tgpg_mpi_t seckey;
   char *plain;
   size_t plainlen, n;
 
@@ -144,7 +144,7 @@ tgpg_decrypt (tgpg_t ctx, tgpg_data_t cipher, tgpg_data_t *plain)
 
   /* Asymmetric cipher parameters.  */
   keyinfo_t keyinfo;
-  mpidesc_t encdat;
+  tgpg_mpi_t encdat;
 
   /* Block cipher parameters.  */
   int mdc = 0;

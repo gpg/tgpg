@@ -28,7 +28,7 @@
 #include "keystore.h"
 
 /* XXX: Link this in.  */
-extern struct keytable seckey_table[];
+extern struct tgpg_key_s seckey_table[];
 
 /* Return success (0) if we have the secret key matching the public
    key identified by KI. */
@@ -54,10 +54,10 @@ _tgpg_have_secret_key (keyinfo_t ki)
 /* Return the secret key matching KI at R_SECKEY.  The caller needs to
    release the secret key later using _tgpg_free_secret_key.  */
 int
-_tgpg_get_secret_key (keyinfo_t ki, mpidesc_t *r_seckey)
+_tgpg_get_secret_key (keyinfo_t ki, tgpg_mpi_t *r_seckey)
 {
   int idx, i;
-  mpidesc_t mpis;
+  tgpg_mpi_t mpis;
 
   fprintf (stderr, "DBG: get-secret_key for keyid %04lx%04lx (algo %d)\n",
            ki->keyid[1], ki->keyid[0], ki->pubkey_algo);
@@ -92,7 +92,7 @@ _tgpg_get_secret_key (keyinfo_t ki, mpidesc_t *r_seckey)
 
 
 void
-_tgpg_free_secret_key (mpidesc_t seckey)
+_tgpg_free_secret_key (tgpg_mpi_t seckey)
 {
   xfree (seckey);
 }

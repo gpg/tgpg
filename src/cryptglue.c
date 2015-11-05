@@ -86,7 +86,7 @@ _tgpg_pk_get_nsig (int algo)
    new allocated buffer at the addres R_PLAN and its length at
    R_PLAINLEN.  On error PLAIN and R_PLAINLEN are set to NULL/0.*/
 int
-_tgpg_pk_decrypt (int algo, mpidesc_t seckey, mpidesc_t encdat,
+_tgpg_pk_decrypt (int algo, tgpg_mpi_t seckey, tgpg_mpi_t encdat,
                   char **r_plain, size_t *r_plainlen)
 {
   int rc;

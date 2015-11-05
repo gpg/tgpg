@@ -102,17 +102,6 @@ struct tgpg_data_s
 typedef struct tgpg_data_s *bufdesc_t;
 
 
-/* A descriptor for an MPI.  We do not store the actual value but let
-   it point to a buffer, this avoids an extra copy.  */
-struct mpidesc_s
-{
-  unsigned int nbits; /* The length of the MPI measured in bits.      */
-  size_t valuelen;    /* The length of this value measured in bytes.  */
-  const char *value;  /* The value of the MPI. */
-};
-typedef struct mpidesc_s *mpidesc_t;
-
-
 /* Information pertaining to a public key.  */
 struct keyinfo_s
 {

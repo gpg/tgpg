@@ -30,7 +30,7 @@
 unsigned int _tgpg_pk_get_nenc (int algo);
 unsigned int _tgpg_pk_get_nsig (int algo);
 
-int _tgpg_pk_decrypt (int algo, mpidesc_t seckey, mpidesc_t encdat,
+int _tgpg_pk_decrypt (int algo, tgpg_mpi_t seckey, tgpg_mpi_t encdat,
                       char **r_plain, size_t *r_plainlen);
 
 

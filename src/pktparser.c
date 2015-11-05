@@ -69,7 +69,7 @@ get_u16 (const char *buffer)
    length byte) the pointer are not updated and an error is
    returned.  */
 int
-get_mpi (char const **buffer, size_t *buflen, mpidesc_t mpi)
+get_mpi (char const **buffer, size_t *buflen, tgpg_mpi_t mpi)
 {
   const char *buf = *buffer;
   size_t len = *buflen;
@@ -298,7 +298,7 @@ _tgpg_identify_message (bufdesc_t msg, tgpg_msg_type_t *r_type)
    defined.  */
 static int
 parse_pubkey_enc_packet (const char *data, size_t datalen,
-                         keyinfo_t ki, mpidesc_t encdat)
+                         keyinfo_t ki, tgpg_mpi_t encdat)
 {
   int rc, nenc, idx;
 
@@ -343,7 +343,7 @@ parse_pubkey_enc_packet (const char *data, size_t datalen,
 int
 _tgpg_parse_encrypted_message (bufdesc_t msg, int *r_mdc,
                                size_t *r_start, size_t *r_length,
-                               keyinfo_t r_keyinfo, mpidesc_t r_encdat )
+                               keyinfo_t r_keyinfo, tgpg_mpi_t r_encdat )
 {
   int rc;
   const char *image, *data;

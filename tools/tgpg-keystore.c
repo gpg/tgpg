@@ -207,7 +207,7 @@ process_file (const struct keyid *keyid, const char *fname, FILE *stream)
 
   fprintf (stream,
            "  {\n"
-           "    PK_ALGO_RSA, 0x%08lx, 0x%08lx,\n"
+           "    1 /* PK_ALGO_RSA */, 0x%08lx, 0x%08lx,\n"
            "    {\n",
            keyid->high, keyid->low);
 
@@ -349,10 +349,9 @@ main (int argc, char **argv)
 
   fprintf (stream,
            "#include <stdio.h>\n"
-           "#include \"tgpgdefs.h\"\n"
-           "#include \"keystore.h\"\n"
+           "#include <tgpg.h>\n"
            "\n"
-           "struct keytable seckey_table[] = {\n");
+           "struct tgpg_key_s seckey_table[] = {\n");
 
   for (; argc; argc -= 2, argv += 2)
     {

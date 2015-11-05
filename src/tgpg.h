@@ -78,10 +78,29 @@ typedef struct tgpg_context_s *tgpg_t;
    tgpg.  */
 struct tgpg_data_s;
 typedef struct tgpg_data_s *tgpg_data_t;
+
+/* Key management.  */
 
+/* A descriptor for an MPI.  We do not store the actual value but let
+   it point to a buffer, this avoids an extra copy.  */
+struct tgpg_mpi_s
+{
+  unsigned int nbits; /* The length of the MPI measured in bits.      */
+  size_t valuelen;    /* The length of this value measured in bytes.  */
+  const char *value;  /* The value of the MPI. */
+};
+typedef struct tgpg_mpi_s *tgpg_mpi_t;
 
-
-
+/* A key for use with TGPG.  */
+struct tgpg_key_s
+{
+  int algo;
+  unsigned long keyid_high;
+  unsigned long keyid_low;
+  struct tgpg_mpi_s mpis[6];
+};
+typedef struct tgpg_key_s *tgpg_key_t;
+
 /*
    Prototypes
 */
