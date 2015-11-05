@@ -40,6 +40,7 @@ development_version=no
 NEED_LIBGCRYPT_API=1
 NEED_LIBGCRYPT_VERSION=1.2.0
 
+AC_CONFIG_AUX_DIR([build-aux])
 AC_CONFIG_SRCDIR(src/tgpg.c)
 AM_CONFIG_HEADER(config.h)
 AC_CONFIG_MACRO_DIR([m4])
