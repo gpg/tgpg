@@ -24,11 +24,40 @@ AM_CFLAGS = $(LIBGCRYPT_CFLAGS)
 
 noinst_PROGRAMS = tgpgtest
 
+# The test driver.
 tgpgtest_SOURCES  = tgpgtest.c keystore-static.c
-
 tgpgtest_CFLAGS = -I$(top_srcdir)/src
 tgpgtest_LDADD = $(LIBGCRYPT_LIBS) -L../src -ltgpg
 
-keystore-static.c: keystore-static.c.sample
-	@echo Using empty key store.  See tools/tgpg-keystore.
-	cp -v "$<" "$@"
+# Key generation
+GPG		?= gpg2
+GPGHOME		?= gpghome
+GPGFLAGS	?=
+GPGFLAGSH	 = --homedir "$(GPGHOME)" $(GPGFLAGS)
+GPGX		 = $(GPG) $(GPGFLAGSH) --with-colons --with-keygrip -k
+
+gpghome: key.script
+	mkdir "$@"
+	chmod 700 "$@"
+	$(GPG) --homedir "$@" $(GPGFLAGS) --gen-key --batch '$<'
+
+keystore-static.c: $(GPGHOME) ../tools/tgpg-keystore
+	../tools/tgpg-keystore \
+		`$(GPGX) | grep '^sub' | cut -d: -f5` \
+		"$<"/private-keys-v1.d/`$(GPGX) | grep '^grp' | tail -n 1 | cut -d: -f10`.key >"$@"
+
+%.gpg: %
+	rm -f -- "$@"
+	$(GPG) $(GPGFLAGSH) --recipient `$(GPGX) | grep '^sub' | cut -d: -f5` --disable-mdc -z0 --batch --encrypt "$<"
+
+TESTFILE	= testdata
+
+$(TESTFILE):
+	dd if=/dev/urandom of="$@" bs=4k count=1
+
+check: tgpgtest $(TESTFILE) $(TESTFILE).gpg
+	test "`sha1sum < $(TESTFILE)`" \
+		= "`./tgpgtest $(TESTFILE).gpg | sha1sum`"
+
+clean-local:
+	rm -rf -- gpghome $(TESTFILE) $(TESTFILE).gpg
