@@ -21,7 +21,11 @@
 #ifndef KEYSTORE_H
 #define KEYSTORE_H
 
+#include "tgpg.h"
 #include "tgpgdefs.h"
+
+/* XXX: Rename this.  */
+const struct tgpg_key_s *seckey_table;
 
 int _tgpg_have_secret_key (keyinfo_t ki);
 int _tgpg_get_secret_key (keyinfo_t ki, tgpg_mpi_t *r_seckey);

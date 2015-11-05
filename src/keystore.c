@@ -27,8 +27,7 @@
 #include "tgpgdefs.h"
 #include "keystore.h"
 
-/* XXX: Link this in.  */
-extern struct tgpg_key_s seckey_table[];
+const struct tgpg_key_s *seckey_table = { { /* sentinel */ 0 } };
 
 /* Return success (0) if we have the secret key matching the public
    key identified by KI. */

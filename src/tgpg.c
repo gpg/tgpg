@@ -19,15 +19,33 @@
    MA 02110-1301, USA.  */
 
 #include <config.h>
+#include <gcrypt.h>
 #include <stdio.h>
 #include <stdlib.h>
 #include <string.h>
 #include <assert.h>
 
+#include "tgpg.h"
 #include "tgpgdefs.h"
 #include "pktparser.h"
+#include "keystore.h"
+
+/* Initialization.  */
+int
+tgpg_init (const tgpg_key_t keytable)
+{
+  gcry_control (GCRYCTL_DISABLE_SECMEM, 0);
+  if (! gcry_check_version (GCRYPT_VERSION))
+    {
+      fprintf (stderr, "libtgpg: libgcrypt version mismatch\n");
+      return TGPG_BUG;
+    }
+  gcry_control (GCRYCTL_INITIALIZATION_FINISHED, 0);
 
-
+  seckey_table = keytable;
+  return TGPG_NO_ERROR;
+}
+
 /* Create a new context as an environment for all operations.  Returns
    0 on success and stores the new context at R_CTX. */
 int

@@ -31,8 +31,6 @@
 #include <sys/stat.h>
 #include <unistd.h>
 
-#include <gcrypt.h>
-
 #include <tgpg.h>  /* Obviously we only include the public header. */
 
 #define PGM "tgpgtest"
@@ -217,6 +215,7 @@ process_file (const char *fname)
 int
 main (int argc, char **argv)
 {
+  int err;
   int last_argc = -1;
 
   if (argc)
@@ -224,13 +223,10 @@ main (int argc, char **argv)
       argc--; argv++;
     }
 
-  gcry_control (GCRYCTL_DISABLE_SECMEM, 0);
-  if (!gcry_check_version (GCRYPT_VERSION))
-    {
-      fprintf (stderr, PGM ": libgcrypt version mismatch\n");
-      exit (1);
-    }
-  gcry_control (GCRYCTL_INITIALIZATION_FINISHED, 0);
+  extern struct tgpg_key_s keystore[];
+  err = tgpg_init (keystore);
+  if (err)
+    exit (1);
 
   while (argc && last_argc != argc )
     {
