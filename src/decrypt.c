@@ -22,6 +22,7 @@
 #include <stdio.h>
 #include <stdlib.h>
 #include <string.h>
+#include <time.h>
 #include <assert.h>
 
 #include "tgpgdefs.h"
@@ -116,22 +117,53 @@ decrypt_session_key (keyinfo_t keyinfo, mpidesc_t encdat,
   return rc;
 }
 
+static size_t
+cipher_to_blocksize (int cipher)
+{
+    switch (cipher)
+    {
+    case CIPHER_ALGO_AES:
+    case CIPHER_ALGO_AES192:
+    case CIPHER_ALGO_AES256:
+      /* XXX case CIPHER_ALGO_TWOFISH */
+      return 16;
+    default:
+      return 8;
+    }
+}
 
 /* Assume that CIPHER is a data object holding a complete encrypted
    message.  Decrypt thet message and store the result into PLAIN.
    CTX is the usual context.  Returns 0 on success.  */
 int
-tgpg_decrypt (tgpg_t ctx, tgpg_data_t cipher, tgpg_data_t plain)
+tgpg_decrypt (tgpg_t ctx, tgpg_data_t cipher, tgpg_data_t *plain)
 {
   int rc;
   size_t startoff;
   size_t length;
+
+  /* Asymmetric cipher parameters.  */
   keyinfo_t keyinfo;
   mpidesc_t encdat;
-  int mdc;
+
+  /* Block cipher parameters.  */
+  int mdc = 0;
   int algo;
   char *seskey;
   size_t seskeylen;
+  size_t blocksize = 8;
+  const char iv[16] = { 0 };
+
+  /* The decrypted literal data packet.  */
+  char *buffer = NULL, *buf;
+  tgpg_data_t plainpacket = NULL;
+  tgpg_msg_type_t msgtype;
+
+  /* Plaintext data.  */
+  unsigned char format;
+  char filename[0xff + 1];
+  time_t date;
+  size_t start;
 
   keyinfo = xtrycalloc (1, sizeof *keyinfo);
   if (!keyinfo)
@@ -150,30 +182,87 @@ tgpg_decrypt (tgpg_t ctx, tgpg_data_t cipher, tgpg_data_t plain)
     goto leave;
 
   rc = decrypt_session_key (keyinfo, encdat, &algo, &seskey, &seskeylen);
-  if (!rc)
+  if (rc)
+    goto leave;
+
+  blocksize = cipher_to_blocksize (algo);
+
+  /* Allocate buffer for the plaintext.  */
+  buffer = buf = xtrymalloc (length);
+  if (buffer == NULL)
     {
-      size_t n;
-      int i;
-
-      fprintf (stderr, "DBG: algo: %d session key: ", algo);
-      for (i=0; i < seskeylen; i++)
-        fprintf (stderr, "%02X", ((unsigned char*)seskey)[i]);
-      putc ('\n', stderr);
-      fprintf (stderr, "DBG: pky_encrypted at off %lu rest of data:\n",
-               (unsigned long)startoff);
-
-      for (n=startoff, i=0; n < cipher->length; n++)
-        {
-          fprintf (stderr, "%02X", ((unsigned char*)cipher->image)[n]);
-          if (!(++i%32))
-            putc ('\n', stderr);
-        }
-      if ((i%32))
-        putc ('\n', stderr);
+      rc = TGPG_SYSERROR;
+      goto leave;
     }
 
+  /* Session key quick check.  */
+  rc = _tgpg_cipher_decrypt (algo, CIPHER_MODE_CFB,
+                             seskey, seskeylen,
+                             iv, blocksize,
+                             buf, length,
+                             &cipher->image[startoff], blocksize+2);
+  if (rc)
+    goto leave;
+
+  /* The last two octets are repeated.  */
+  if (buf[blocksize-2] != buf[blocksize]
+      || buf[blocksize-1] != buf[blocksize+1])
+    {
+      rc = TGPG_INV_MSG;
+      goto leave;
+    }
+
+  /* Re-synchronize with previous ciphertext.  */
+  startoff += 2, length -= 2;
+
+  /* Decrypt body.  */
+  rc = _tgpg_cipher_decrypt (algo, CIPHER_MODE_CFB,
+                             seskey, seskeylen,
+                             iv, blocksize,
+                             buf, length,
+                             &cipher->image[startoff], length);
+  if (rc)
+    goto leave;
+
+  /* Skip random data.  */
+  buf += blocksize, length -= blocksize;
+
+  /* Put it in a container so that we can parse it.  */
+  rc = tgpg_data_new_from_mem (&plainpacket, buf, length, 1);
+  if (rc)
+    goto leave;
+
+  rc = tgpg_identify (plainpacket, &msgtype);
+  if (rc)
+    goto leave;
+
+  if (msgtype != TGPG_MSG_PLAINTEXT)
+    {
+      rc = TGPG_INV_MSG;
+      goto leave;
+    }
+
+  /* Finally, parse the decrypted data...  */
+  rc = _tgpg_parse_plaintext_message (plainpacket,
+                                      &format,
+                                      filename,
+                                      &date,
+                                      &start,
+                                      &length);
+  if (rc)
+    goto leave;
+  fprintf (stderr, "DBG: format %c, filename %s, length %zd, date %s",
+           format, filename, length, ctime (&date));
+
+  /* ... and present the content to the user.  */
+  rc = tgpg_data_new_from_mem (plain,
+                               &plainpacket->buffer[start],
+                               length,
+                               1);
 
  leave:
+  tgpg_data_release (plainpacket);
+  xfree (buffer);
   xfree (encdat);
   xfree (keyinfo);
   return rc;

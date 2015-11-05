@@ -155,6 +155,8 @@ process_file (const char *fname)
   tgpg_data_t inpdata = NULL;
   tgpg_data_t outdata = NULL;
   tgpg_t ctx = NULL;
+  const char *data;
+  size_t length;
 
   inpfile = read_file (fname, &inplen);
   if (!inpfile)
@@ -180,14 +182,6 @@ process_file (const char *fname)
     }
   fprintf (stderr, PGM": message type of file `%s' is %d\n", fname, msgtype);
 
-  rc = tgpg_data_new (&outdata);
-  if (rc)
-    {
-      fprintf (stderr, PGM": can't create output data object: %s\n",
-               tgpg_strerror (rc));
-      goto leave;
-    }
-
   rc = tgpg_new (&ctx);
   if (rc)
     {
@@ -198,15 +192,16 @@ process_file (const char *fname)
 
   if ( msgtype == TGPG_MSG_ENCRYPTED )
     {
-      rc = tgpg_decrypt (ctx, inpdata, outdata);
+      rc = tgpg_decrypt (ctx, inpdata, &outdata);
       if (rc)
         {
           fprintf (stderr, PGM": decrypting `%s' failed: %s\n",
                    fname, tgpg_strerror (rc));
           goto leave;
         }
-      /* fixme: Do something with the output.  */
 
+      tgpg_data_get (outdata, &data, &length);
+      write (fileno (stdout), data, length);
     }
 
  leave:
