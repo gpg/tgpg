@@ -35,6 +35,7 @@
 
 #define PGM "tgpg-keystore"
 
+static const char *name = "keystore";
 static int verbose;
 static int debug;
 static FILE *stream;
@@ -316,14 +317,24 @@ main (int argc, char **argv)
       else if (!strcmp (*argv, "--help"))
         {
           puts (
-                "Usage: " PGM " [OPTION] [FILE]\n"
-                "Simple tool to test TGPG.\n\n"
+                "Usage: " PGM " [OPTION] KEYID PRIVATE-KEY-FILE [KEYID PKF...]\n"
+                "Simple tool to generate static keystores for TGPG.\n\n"
+                "  --name NAME specify name of the symbol [default: keystore]\n"
                 "  --verbose   enable extra informational output\n"
                 "  --debug     enable additional debug output\n"
                 "  --help      display this help and exit\n\n"
-                "With no FILE, or when FILE is -, read standard input.\n\n"
                 "Report bugs to <" PACKAGE_BUGREPORT ">.");
           exit (0);
+        }
+      else if (!strcmp (*argv, "--name"))
+        {
+          if (! argc)
+            {
+              fprintf (stderr, "expected a name\n");
+              exit (1);
+            }
+          name = argv[1];
+          argc -= 2, argv += 2;
         }
       else if (!strcmp (*argv, "--verbose"))
         {
@@ -351,7 +362,8 @@ main (int argc, char **argv)
            "#include <stdio.h>\n"
            "#include <tgpg.h>\n"
            "\n"
-           "struct tgpg_key_s seckey_table[] = {\n");
+           "struct tgpg_key_s %s[] = {\n",
+           name);
 
   for (; argc; argc -= 2, argv += 2)
     {
