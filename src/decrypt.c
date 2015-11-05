@@ -117,21 +117,6 @@ decrypt_session_key (keyinfo_t keyinfo, tgpg_mpi_t encdat,
   return rc;
 }
 
-static size_t
-cipher_to_blocksize (int cipher)
-{
-    switch (cipher)
-    {
-    case CIPHER_ALGO_AES:
-    case CIPHER_ALGO_AES192:
-    case CIPHER_ALGO_AES256:
-      /* XXX case CIPHER_ALGO_TWOFISH */
-      return 16;
-    default:
-      return 8;
-    }
-}
-
 /* Assume that CIPHER is a data object holding a complete encrypted
    message.  Decrypt thet message and store the result into PLAIN.
    CTX is the usual context.  Returns 0 on success.  */
@@ -185,7 +170,7 @@ tgpg_decrypt (tgpg_t ctx, tgpg_data_t cipher, tgpg_data_t *plain)
   if (rc)
     goto leave;
 
-  blocksize = cipher_to_blocksize (algo);
+  blocksize = _tgpg_cipher_blocklen (algo);
 
   /* Allocate buffer for the plaintext.  */
   buffer = buf = xtrymalloc (length);
