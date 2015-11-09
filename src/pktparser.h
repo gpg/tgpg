@@ -1,4 +1,4 @@
-/* pkyparser.h - Internal interface to the packet parser
+/* pktparser.h - Internal interface to the packet parser
    Copyright (C) 2007 g10 Code GmbH
 
    This file is part of TGPG.
