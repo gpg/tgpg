@@ -104,8 +104,11 @@ void _tgpg_hash_close (hash_t ctx);
 void _tgpg_hash_reset (hash_t ctx);
 void _tgpg_hash_write (hash_t ctx, const void *buffer, size_t length);
 const void *_tgpg_hash_read (hash_t ctx);
+
+/* Random data. */
 
-
-
+/* Fill BUFFER of given LENGTH with random data suitable for session
+   keys.  */
+void _tgpg_randomize (unsigned char *buffer, size_t length);
 
 #endif /*CRYPTGLUE_H*/

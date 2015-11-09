@@ -350,3 +350,9 @@ _tgpg_hash_read (hash_t ctx)
 
   return gcry_md_read (hd, 0);
 }
+
+void
+_tgpg_randomize (unsigned char *buffer, size_t length)
+{
+  gcry_randomize (buffer, length, GCRY_STRONG_RANDOM);
+}
