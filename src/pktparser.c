@@ -433,6 +433,7 @@ _tgpg_parse_plaintext_message (bufdesc_t msg,
   const char *image, *data;
   size_t imagelen, datalen, n;
   int pkttype;
+  int plaintext_seen = 0;
 
   image = msg->image;
   imagelen = msg->length;
@@ -446,6 +447,10 @@ _tgpg_parse_plaintext_message (bufdesc_t msg,
       switch (pkttype)
         {
         case PKT_PLAINTEXT:
+          if (plaintext_seen)
+            return TGPG_UNEXP_PKT;
+          plaintext_seen = 1;
+
           {
             size_t len;
 
@@ -467,5 +472,5 @@ _tgpg_parse_plaintext_message (bufdesc_t msg,
         }
     }
 
-  return 0;
+  return plaintext_seen? 0: TGPG_INV_MSG;
 }
