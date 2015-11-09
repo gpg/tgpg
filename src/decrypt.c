@@ -118,7 +118,7 @@ decrypt_session_key (keyinfo_t keyinfo, tgpg_mpi_t encdat,
 }
 
 /* Assume that CIPHER is a data object holding a complete encrypted
-   message.  Decrypt thet message and store the result into PLAIN.
+   message.  Decrypt the message and store the result into PLAIN.
    CTX is the usual context.  Returns 0 on success.  */
 int
 tgpg_decrypt (tgpg_t ctx, tgpg_data_t cipher, tgpg_data_t *plain)
