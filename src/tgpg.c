@@ -159,6 +159,28 @@ tgpg_data_new_from_mem (tgpg_data_t *r_data,
 }
 
 
+/* Make sure the given buffer is writable and at least SIZE long.  */
+int
+tgpg_data_resize (tgpg_data_t data, size_t size)
+{
+  void *buf;
+
+  buf = xtryrealloc (data->buffer, size);
+  if (buf == NULL)
+    return TGPG_SYSERROR;
+
+  data->buffer = buf;
+  if (data->image != data->buffer)
+    {
+      memcpy (data->buffer, data->image, data->length);
+      data->image = data->buffer;
+    }
+
+  data->length = size;
+  return TGPG_NO_ERROR;
+}
+
+
 /* Release all the memory associated with the DATA object.  Passing
    NULL as an no-op is allowed.  If the caller has allocated the
    object using a shallow copy (i.e. tgpg_data_new_from_mem with the

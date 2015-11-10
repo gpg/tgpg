@@ -132,6 +132,9 @@ int tgpg_data_new (tgpg_data_t *r_data);
 int tgpg_data_new_from_mem (tgpg_data_t *r_data,
                             const char *buffer, size_t length, int copy);
 
+/* Make sure the given buffer is writable and at least SIZE long.  */
+int tgpg_data_resize (tgpg_data_t data, size_t size);
+
 /* Release all the memory associated with the DATA object.  Passing
    NULL as an no-op is allowed.  If the caller has allocated the
    object using a shallow copy (i.e. tgpg_data_new_from_mem with the
