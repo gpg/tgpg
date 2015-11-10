@@ -29,6 +29,7 @@
 #include "pktparser.h"
 #include "keystore.h"
 #include "cryptglue.h"
+#include "pkcs1.h"
 
 
 static int
@@ -38,7 +39,7 @@ decrypt_session_key (keyinfo_t keyinfo, tgpg_mpi_t encdat,
   int rc;
   tgpg_mpi_t seckey;
   char *plain;
-  size_t plainlen, n;
+  size_t plainlen;
 
   *r_seskey = NULL;
   *r_seskeylen = 0;
@@ -60,49 +61,32 @@ decrypt_session_key (keyinfo_t keyinfo, tgpg_mpi_t encdat,
              tgpg_strerror (rc));
   else
     {
-      {
-        int i;
-
-        fprintf (stderr, "DBG: session key frame: ");
-        for (i=0; i < plainlen; i++)
-          fprintf (stderr, "%02X", ((unsigned char*)plain)[i]);
-        putc ('\n', stderr);
-      }
-
-      if (plainlen < 7 || plain[0] != 2)
-        rc = TGPG_WRONG_KEY; /* Too short or not a type 2 block.  */
-      else
+      const char *body;
+      size_t bodylen;
+      rc = _tgpg_eme_pkcs1_decode (plain, plainlen, &body, &bodylen);
+      if (! rc)
         {
-          /* Skip random part.  */
-          for (n=1; n < plainlen && plain[n]; n++)
-            ;
-          n++; /* Skip the terminating 0.  */
-          /* PLAIN+N -> <algobyte> <keybytes> <2byteschecksum> */
-          if (n + 4 > plainlen || n < 10 )
-            rc = TGPG_WRONG_KEY; /* Too short or not enough random bytes. */
+          /* body -> <algobyte> <keybytes> <2bytes checksum> */
+          int algo;
+          size_t seskeylen;
+          const char *seskey;
+          unsigned short csum, csum2;
+
+          algo = ((unsigned char*)body)[0];
+          seskey = body + 1;
+          seskeylen = bodylen - 1 - 2;
+          csum = ((((unsigned char *)body)[bodylen-2] << 8)
+                  | ((unsigned char *)body)[bodylen-1]);
+          _tgpg_checksum (seskey, seskeylen, &csum2);
+          if (csum != csum2)
+            rc = TGPG_WRONG_KEY;
+          else if (!(*r_seskey = xtrymalloc (seskeylen)))
+            rc = TGPG_SYSERROR;
           else
             {
-              int algo;
-              size_t seskeylen;
-              char *seskey;
-              unsigned short csum, csum2;
-
-              algo = ((unsigned char*)plain)[n++];
-              seskey = plain + n;
-              seskeylen = plainlen - n - 2;
-              csum = ((((unsigned char *)plain)[plainlen-2] << 8)
-                      | ((unsigned char *)plain)[plainlen-1]);
-              _tgpg_checksum (seskey, seskeylen, &csum2);
-              if (csum != csum2)
-                rc = TGPG_WRONG_KEY;
-              else if (!(*r_seskey = xtrymalloc (seskeylen)))
-                rc = TGPG_SYSERROR;
-              else
-                {
-                  memcpy (*r_seskey, seskey, seskeylen);
-                  *r_seskeylen = seskeylen;
-                  *r_algo = algo;
-                }
+              memcpy (*r_seskey, seskey, seskeylen);
+              *r_seskeylen = seskeylen;
+              *r_algo = algo;
             }
         }
     }
