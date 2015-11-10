@@ -103,3 +103,18 @@ _tgpg_canonsexp_len (const unsigned char *sexp, size_t length)
   return 0; /* Error.  */
 }
 
+
+/* Compute the sum modulo 2**16 over DATA of LENGTH storing the result
+   in R_CSUM.  */
+void
+_tgpg_checksum (const char *data, size_t length,
+		unsigned short *r_csum)
+{
+  size_t n;
+  unsigned short sum = 0;
+
+  for (n = 0; n < length; n++)
+    sum = (sum + ((const unsigned char *) data)[n]) & 0xffff;
+
+  *r_csum = sum;
+}

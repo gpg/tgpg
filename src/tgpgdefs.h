@@ -129,6 +129,8 @@ int _tgpg_make_buffer_mutable (bufdesc_t buf);
 
 /*-- util.c --*/
 size_t _tgpg_canonsexp_len (const unsigned char *sexp, size_t length);
+void _tgpg_checksum (const char *data, size_t length,
+		     unsigned short *r_csum);
 
 
 

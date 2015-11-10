@@ -92,8 +92,7 @@ decrypt_session_key (keyinfo_t keyinfo, tgpg_mpi_t encdat,
               seskeylen = plainlen - n - 2;
               csum = ((((unsigned char *)plain)[plainlen-2] << 8)
                       | ((unsigned char *)plain)[plainlen-1]);
-              for (csum2=0, n=0; n < seskeylen; n++ )
-                csum2 = ((csum2 + ((unsigned char *)seskey)[n]) & 0xffff);
+              _tgpg_checksum (seskey, seskeylen, &csum2);
               if (csum != csum2)
                 rc = TGPG_WRONG_KEY;
               else if (!(*r_seskey = xtrymalloc (seskeylen)))
