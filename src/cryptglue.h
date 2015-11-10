@@ -44,6 +44,7 @@ enum cipher_modes
   };
 
 unsigned int _tgpg_cipher_blocklen (int algo);
+unsigned int _tgpg_cipher_keylen (int algo);
 int _tgpg_cipher_decrypt (int algo, enum cipher_modes mode,
                           const void *key, size_t keylen,
                           const void *iv, size_t ivlen,

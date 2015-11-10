@@ -159,11 +159,15 @@ _tgpg_pk_decrypt (int algo, tgpg_mpi_t seckey, tgpg_mpi_t encdat,
 unsigned int
 _tgpg_cipher_blocklen (int algo)
 {
-  if (algo == CIPHER_ALGO_AES || algo == CIPHER_ALGO_AES192
-      || algo == CIPHER_ALGO_AES256)
-    return 16;
-  else
-    return 8;
+  return gcry_cipher_get_algo_blklen (algo);
+}
+
+
+/* Return the key length in bytes of the cipher ALGO.  */
+unsigned int
+_tgpg_cipher_keylen (int algo)
+{
+  return gcry_cipher_get_algo_keylen (algo);
 }
 
 
