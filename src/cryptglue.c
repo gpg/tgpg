@@ -260,16 +260,23 @@ cipher_endecrypt (int do_encrypt,
                   const void * inbuf, size_t inbuflen)
 {
   gpg_error_t err;
+  int flags = 0;
   gcry_cipher_hd_t hd;
+  size_t bs = _tgpg_cipher_blocklen (algo);
+  char init[18];
 
   switch (mode)
     {
     case CIPHER_MODE_CBC: mode = GCRY_CIPHER_MODE_CBC; break;
     case CIPHER_MODE_CFB: mode = GCRY_CIPHER_MODE_CFB; break;
+    case CIPHER_MODE_CFB_PGP:
+      mode = GCRY_CIPHER_MODE_CFB;
+      flags |= GCRY_CIPHER_ENABLE_SYNC;
+      break;
     default: return TGPG_BUG;
     }
 
-  err = gcry_cipher_open (&hd, algo, mode, 0);
+  err = gcry_cipher_open (&hd, algo, mode, flags);
   if (err)
     goto leave;
   err = gcry_cipher_setkey (hd, key, keylen);
@@ -278,6 +285,41 @@ cipher_endecrypt (int do_encrypt,
   err = gcry_cipher_setiv (hd, iv, ivlen);
   if (err)
     goto leave;
+
+  /* If CIPHER_MODE_CFB_PGP is used, handle cipher initialization and
+     re-synchronization.  */
+  if (flags & GCRY_CIPHER_ENABLE_SYNC)
+    {
+      if (do_encrypt)
+        {
+          /* Generate initialization data.  */
+          _tgpg_randomize ((unsigned char *) init, bs);
+
+          /* Session key quick check, repeat the last two octets.  */
+          init[bs] = init[bs-2];
+          init[bs+1] = init[bs-1];
+
+          err = gcry_cipher_encrypt (hd, outbuf, outbufsize, init, bs+2);
+          outbuf += bs+2, outbufsize -= bs+2;
+        }
+      else
+        {
+          err = gcry_cipher_decrypt (hd, init, sizeof init, inbuf, bs+2);
+          if (err)
+            goto leave;
+          inbuf += bs+2, inbuflen -= bs+2;
+
+          /* The last two octets are repeated.  */
+          if (init[bs-2] != init[bs] || init[bs-1] != init[bs+1])
+            err = TGPG_WRONG_KEY;
+        }
+      if (err)
+        goto leave;
+
+      err = gcry_cipher_sync (hd);
+      if (err)
+        goto leave;
+    }
 
   err = \
     (do_encrypt ? gcry_cipher_encrypt : gcry_cipher_decrypt)    \

@@ -123,7 +123,8 @@ tgpg_decrypt (tgpg_t ctx, tgpg_data_t cipher, tgpg_data_t *plain)
   const char iv[16] = { 0 };
 
   /* The decrypted literal data packet.  */
-  char *buffer = NULL, *buf;
+  char *buffer = NULL;
+  size_t bufferlen;
   tgpg_data_t plainpacket = NULL;
   tgpg_msg_type_t msgtype;
 
@@ -156,47 +157,25 @@ tgpg_decrypt (tgpg_t ctx, tgpg_data_t cipher, tgpg_data_t *plain)
   blocksize = _tgpg_cipher_blocklen (algo);
 
   /* Allocate buffer for the plaintext.  */
-  buffer = buf = xtrymalloc (length);
+  bufferlen = length - blocksize - 2;
+  buffer = xtrymalloc (bufferlen);
   if (buffer == NULL)
     {
       rc = TGPG_SYSERROR;
       goto leave;
     }
 
-  /* Session key quick check.  */
-  rc = _tgpg_cipher_decrypt (algo, CIPHER_MODE_CFB,
-                             seskey, seskeylen,
-                             iv, blocksize,
-                             buf, length,
-                             &cipher->image[startoff], blocksize+2);
-  if (rc)
-    goto leave;
-
-  /* The last two octets are repeated.  */
-  if (buf[blocksize-2] != buf[blocksize]
-      || buf[blocksize-1] != buf[blocksize+1])
-    {
-      rc = TGPG_INV_MSG;
-      goto leave;
-    }
-
-  /* Re-synchronize with previous ciphertext.  */
-  startoff += 2, length -= 2;
-
   /* Decrypt body.  */
-  rc = _tgpg_cipher_decrypt (algo, CIPHER_MODE_CFB,
+  rc = _tgpg_cipher_decrypt (algo, CIPHER_MODE_CFB_PGP,
                              seskey, seskeylen,
                              iv, blocksize,
-                             buf, length,
+                             buffer, bufferlen,
                              &cipher->image[startoff], length);
   if (rc)
     goto leave;
 
-  /* Skip random data.  */
-  buf += blocksize, length -= blocksize;
-
   /* Put it in a container so that we can parse it.  */
-  rc = tgpg_data_new_from_mem (&plainpacket, buf, length, 1);
+  rc = tgpg_data_new_from_mem (&plainpacket, buffer, bufferlen, 1);
   if (rc)
     goto leave;
 

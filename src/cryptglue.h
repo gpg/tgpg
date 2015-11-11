@@ -42,8 +42,9 @@ int _tgpg_pk_encrypt (int algo, tgpg_mpi_t pubkey,
 
 enum cipher_modes
   {
-    CIPHER_MODE_CBC   = 1,
-    CIPHER_MODE_CFB   = 2
+    CIPHER_MODE_CBC	= 1,
+    CIPHER_MODE_CFB	= 2,
+    CIPHER_MODE_CFB_PGP	= 3,
   };
 
 unsigned int _tgpg_cipher_blocklen (int algo);
