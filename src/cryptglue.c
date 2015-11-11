@@ -83,7 +83,7 @@ _tgpg_pk_get_nsig (int algo)
 
 /* Run a decrypt operation on the data in ENCDAT using the provided key
    SECKEY and algorithm ALGO.  On success the result is stored as a
-   new allocated buffer at the addres R_PLAN and its length at
+   new allocated buffer at the address R_PLAN and its length at
    R_PLAINLEN.  On error PLAIN and R_PLAINLEN are set to NULL/0.*/
 int
 _tgpg_pk_decrypt (int algo, tgpg_mpi_t seckey, tgpg_mpi_t encdat,
