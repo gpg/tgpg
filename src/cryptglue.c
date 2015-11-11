@@ -1,5 +1,5 @@
 /* cryptglue.c - Crypto glue layer using libgcrypt.
-   Copyright (C) 2007 g10 Code GmbH
+   Copyright (C) 2007,2015 g10 Code GmbH
 
    This file is part of TGPG.
 
@@ -147,6 +147,84 @@ _tgpg_pk_decrypt (int algo, tgpg_mpi_t seckey, tgpg_mpi_t encdat,
   return rc;
 }
 
+
+/* Run an encrypt operation on PLAIN of length PLAINLEN using the
+   algorithm ALGO and key PUBKEY.  On success, the result is stored in
+   an allocated array R_ENCDAT with R_ENCLEN elements.  */
+int
+_tgpg_pk_encrypt (int algo, tgpg_mpi_t pubkey,
+                  char *plain, size_t plainlen,
+                  tgpg_mpi_t *r_encdat, size_t *r_enclen)
+{
+  int rc;
+  int i;
+  gcry_sexp_t s_plain, s_key, s_cipher, s_list;
+
+  switch (algo)
+    {
+    case PK_ALGO_RSA:
+      rc = gcry_sexp_build (&s_plain, NULL,
+                            "(data(flags)(value%b))",
+                            (int) plainlen, plain);
+      if (rc)
+        return TGPG_INV_DATA;
+
+      rc = gcry_sexp_build (&s_key, NULL,
+			    "(public-key(rsa(n%b)(e%b)))",
+                            (int) pubkey[0].valuelen, pubkey[0].value,
+                            (int) pubkey[1].valuelen, pubkey[1].value);
+      if (rc)
+        {
+          gcry_sexp_release (s_plain);
+          return TGPG_INV_DATA;
+        }
+      break;
+
+    default:
+      return TGPG_INV_ALGO;
+    }
+
+  rc = gcry_pk_encrypt (&s_cipher, s_plain, s_key);
+  gcry_sexp_release (s_plain);
+  gcry_sexp_release (s_key);
+  if (rc)
+    {
+      rc = TGPG_CRYPT_ERR;
+      goto leave;
+    }
+
+  *r_enclen = _tgpg_pk_get_nenc (algo);
+  *r_encdat = xtrymalloc (*r_enclen * sizeof **r_encdat);
+  if (r_encdat == NULL)
+    {
+      rc = TGPG_SYSERROR;
+      goto leave;
+    }
+
+  for (i = 0; i < *r_enclen; i++)
+    {
+      const char *keys = "ab";
+      tgpg_mpi_t r = &(*r_encdat)[i];
+
+      s_list = gcry_sexp_find_token (s_cipher, &keys[i], 1);
+
+      errno = 0;
+      r->value =
+        gcry_sexp_nth_buffer (s_list, 1, &r->valuelen);
+      if (r->value == NULL)
+        {
+          rc = errno != 0 ? TGPG_SYSERROR : TGPG_BUG;
+          goto leave;
+        }
+
+      r->nbits = r->valuelen << 3;
+      gcry_sexp_release (s_list);
+    }
+
+ leave:
+  gcry_sexp_release (s_cipher);
+  return rc;
+}
 
 
 /*

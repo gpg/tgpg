@@ -33,6 +33,9 @@ unsigned int _tgpg_pk_get_nsig (int algo);
 int _tgpg_pk_decrypt (int algo, tgpg_mpi_t seckey, tgpg_mpi_t encdat,
                       char **r_plain, size_t *r_plainlen);
 
+int _tgpg_pk_encrypt (int algo, tgpg_mpi_t pubkey,
+                      char *plain, size_t plainlen,
+                      tgpg_mpi_t *r_encdat, size_t *r_enclen);
 
 
 /*  C i p h er (symmetric)  */
