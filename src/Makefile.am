@@ -31,6 +31,7 @@ libtgpg_la_SOURCES = \
 	cryptglue.c cryptglue.h \
         keystore.c  keystore.h \
         pktparser.c pktparser.h \
+	pktwriter.c pktwriter.h \
 	pkcs1.c pkcs1.h \
 	protect.c protect.h \
 	s2k.c s2k.h \
