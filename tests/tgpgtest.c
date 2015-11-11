@@ -38,7 +38,10 @@
 #define PACKAGE_BUGREPORT "nobody@example.net"
 #endif /*PACKAGE_BUGREPORT*/
 
+/* The keystore is linked in.  */
+extern struct tgpg_key_s keystore[];
 
+static int opt_encrypt;
 static int verbose;
 static int debug;
 
@@ -141,15 +144,53 @@ read_file (const char *fname, size_t *r_length)
 }
 
 
+static int
+do_decrypt (tgpg_t ctx, tgpg_data_t inpdata, tgpg_data_t *outdata)
+{
+  int rc;
+  tgpg_msg_type_t msgtype;
+
+  rc = tgpg_identify (inpdata, &msgtype);
+  if (rc)
+    {
+      fprintf (stderr, PGM": can't identify file: %s\n",
+               tgpg_strerror (rc));
+      goto leave;
+    }
+
+  if (msgtype == TGPG_MSG_ENCRYPTED)
+    rc = tgpg_decrypt (ctx, inpdata, outdata);
+  else
+    rc = TGPG_MSG_INVALID;
+
+ leave:
+  return rc;
+}
+
+static int
+do_encrypt (tgpg_t ctx, tgpg_data_t inpdata, tgpg_data_t *outdata)
+{
+  int rc;
+  /* XXX fix api of tgpg_decrypt */
+  rc = tgpg_data_new (outdata);
+  if (rc)
+    goto leave;
+
+  rc = tgpg_encrypt (ctx, inpdata, &keystore[0], *outdata);
+  if (rc)
+    goto leave;
+
+ leave:
+  return rc;
+}
 
 
-static void
+static int
 process_file (const char *fname)
 {
   char *inpfile;
   size_t inplen;
   int rc;
-  tgpg_msg_type_t msgtype;
   tgpg_data_t inpdata = NULL;
   tgpg_data_t outdata = NULL;
   tgpg_t ctx = NULL;
@@ -171,15 +212,6 @@ process_file (const char *fname)
       goto leave;
     }
 
-  rc = tgpg_identify (inpdata, &msgtype);
-  if (rc)
-    {
-      fprintf (stderr, PGM": can't identify file `%s': %s\n",
-               fname, tgpg_strerror (rc));
-      goto leave;
-    }
-  fprintf (stderr, PGM": message type of file `%s' is %d\n", fname, msgtype);
-
   rc = tgpg_new (&ctx);
   if (rc)
     {
@@ -188,25 +220,23 @@ process_file (const char *fname)
       goto leave;
     }
 
-  if ( msgtype == TGPG_MSG_ENCRYPTED )
+  rc = (opt_encrypt ? do_encrypt : do_decrypt) (ctx, inpdata, &outdata);
+  if (rc)
     {
-      rc = tgpg_decrypt (ctx, inpdata, &outdata);
-      if (rc)
-        {
-          fprintf (stderr, PGM": decrypting `%s' failed: %s\n",
-                   fname, tgpg_strerror (rc));
-          goto leave;
-        }
-
-      tgpg_data_get (outdata, &data, &length);
-      write (fileno (stdout), data, length);
+      fprintf (stderr, PGM": %scryption failed: %s\n",
+               opt_encrypt ? "en" : "de", tgpg_strerror (rc));
+      goto leave;
     }
+
+  tgpg_data_get (outdata, &data, &length);
+  write (fileno (stdout), data, length);
 
  leave:
   tgpg_release (ctx);
   tgpg_data_release (outdata);
   tgpg_data_release (inpdata);
   free (inpfile);
+  return rc;
 }
 
 
@@ -223,7 +253,6 @@ main (int argc, char **argv)
       argc--; argv++;
     }
 
-  extern struct tgpg_key_s keystore[];
   err = tgpg_init (keystore);
   if (err)
     exit (1);
@@ -241,12 +270,18 @@ main (int argc, char **argv)
           puts (
                 "Usage: " PGM " [OPTION] [FILE]\n"
                 "Simple tool to test TGPG.\n\n"
+                "  --encrypt   encrypt rather than decrypt (the default)\n"
                 "  --verbose   enable extra informational output\n"
                 "  --debug     enable additional debug output\n"
                 "  --help      display this help and exit\n\n"
                 "With no FILE, or when FILE is -, read standard input.\n\n"
                 "Report bugs to <" PACKAGE_BUGREPORT ">.");
           exit (0);
+        }
+      else if (!strcmp (*argv, "--encrypt"))
+        {
+          opt_encrypt = 1;
+          argc--; argv++;
         }
       else if (!strcmp (*argv, "--verbose"))
         {
@@ -268,9 +303,9 @@ main (int argc, char **argv)
     }
 
   if (argc)
-    process_file (*argv);
+    err = process_file (*argv);
   else
-    process_file ("-");
+    err = process_file ("-");
 
-  return 0;
+  return err ? EXIT_FAILURE : EXIT_SUCCESS;
 }

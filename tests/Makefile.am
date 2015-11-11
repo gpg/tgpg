@@ -31,6 +31,7 @@ tgpgtest_LDADD = $(LIBGCRYPT_LIBS) -L../src -ltgpg
 
 # Key generation
 GPG		?= gpg2
+TGPG		?= ./tgpgtest
 GPGHOME		?= gpghome
 GPGFLAGS	?=
 GPGFLAGSH	 = --homedir "$(GPGHOME)" $(GPGFLAGS)
@@ -50,14 +51,22 @@ keystore.c: $(GPGHOME) ../tools/tgpg-keystore
 	rm -f -- "$@"
 	$(GPG) $(GPGFLAGSH) --recipient `$(GPGX) | grep '^sub' | cut -d: -f5` --disable-mdc -z0 --batch --encrypt "$<"
 
-TESTFILE	= testdata
+%.tgpg: % $(TGPG)
+	rm -f -- "$@"
+	$(TGPG) --debug --encrypt "$<" >"$@" || ( rm "$@" ; exit 1 )
 
-$(TESTFILE):
-	dd if=/dev/urandom of="$@" bs=4k count=1
+TESTFILES	= test0 test1
+TESTFILES_GPG	= $(foreach TEST,$(TESTFILES),$(TEST).gpg $(TEST).tgpg)
 
-check: tgpgtest $(TESTFILE) $(TESTFILE).gpg
-	test "`sha1sum < $(TESTFILE)`" \
-		= "`./tgpgtest $(TESTFILE).gpg | sha1sum`"
+test0:
+	python -c "import sys; sys.stdout.write(64*'A')" >"$@"
+
+test1:
+	dd if=/dev/urandom of="$@" bs=64 count=1
+
+
+check: tgpgtest $(TESTFILES_GPG)
+	$(top_srcdir)/tests/runtests.bash $(TESTFILES)
 
 clean-local:
-	rm -rf -- gpghome $(TESTFILE) $(TESTFILE).gpg
+	rm -rf -- gpghome $(TESTFILES) $(TESTFILES_GPG)

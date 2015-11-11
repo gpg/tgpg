@@ -37,4 +37,5 @@ libtgpg_la_SOURCES = \
 	s2k.c s2k.h \
 	util.c \
 	strerror.c \
-        decrypt.c
+        decrypt.c \
+	encrypt.c
