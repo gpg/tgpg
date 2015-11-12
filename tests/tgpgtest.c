@@ -145,7 +145,7 @@ read_file (const char *fname, size_t *r_length)
 
 
 static int
-do_decrypt (tgpg_t ctx, tgpg_data_t inpdata, tgpg_data_t *outdata)
+do_decrypt (tgpg_t ctx, tgpg_data_t inpdata, tgpg_data_t outdata)
 {
   int rc;
   tgpg_msg_type_t msgtype;
@@ -168,15 +168,11 @@ do_decrypt (tgpg_t ctx, tgpg_data_t inpdata, tgpg_data_t *outdata)
 }
 
 static int
-do_encrypt (tgpg_t ctx, tgpg_data_t inpdata, tgpg_data_t *outdata)
+do_encrypt (tgpg_t ctx, tgpg_data_t inpdata, tgpg_data_t outdata)
 {
   int rc;
-  /* XXX fix api of tgpg_decrypt */
-  rc = tgpg_data_new (outdata);
-  if (rc)
-    goto leave;
 
-  rc = tgpg_encrypt (ctx, inpdata, &keystore[0], *outdata);
+  rc = tgpg_encrypt (ctx, inpdata, &keystore[0], outdata);
   if (rc)
     goto leave;
 
@@ -212,6 +208,10 @@ process_file (const char *fname)
       goto leave;
     }
 
+  rc = tgpg_data_new (&outdata);
+  if (rc)
+    goto leave;
+
   rc = tgpg_new (&ctx);
   if (rc)
     {
@@ -220,7 +220,7 @@ process_file (const char *fname)
       goto leave;
     }
 
-  rc = (opt_encrypt ? do_encrypt : do_decrypt) (ctx, inpdata, &outdata);
+  rc = (opt_encrypt ? do_encrypt : do_decrypt) (ctx, inpdata, outdata);
   if (rc)
     {
       fprintf (stderr, PGM": %scryption failed: %s\n",

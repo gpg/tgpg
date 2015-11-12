@@ -104,7 +104,7 @@ decrypt_session_key (keyinfo_t keyinfo, tgpg_mpi_t encdat,
    message.  Decrypt the message and store the result into PLAIN.
    CTX is the usual context.  Returns 0 on success.  */
 int
-tgpg_decrypt (tgpg_t ctx, tgpg_data_t cipher, tgpg_data_t *plain)
+tgpg_decrypt (tgpg_t ctx, tgpg_data_t cipher, tgpg_data_t plain)
 {
   int rc;
   size_t startoff;
@@ -202,10 +202,11 @@ tgpg_decrypt (tgpg_t ctx, tgpg_data_t cipher, tgpg_data_t *plain)
            format, filename, length, ctime (&date));
 
   /* ... and present the content to the user.  */
-  rc = tgpg_data_new_from_mem (plain,
-                               &plainpacket->buffer[start],
-                               length,
-                               1);
+  rc = tgpg_data_resize (plain, length);
+  if (rc)
+    goto leave;
+
+  memcpy (plain->buffer, &plainpacket->buffer[start], length);
 
  leave:
   tgpg_data_release (plainpacket);

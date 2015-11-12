@@ -163,7 +163,7 @@ const char *tgpg_strerror (int err);
 
 /*-- decrypt.c --*/
 
-int tgpg_decrypt (tgpg_t ctx, tgpg_data_t cipher, tgpg_data_t *plain);
+int tgpg_decrypt (tgpg_t ctx, tgpg_data_t cipher, tgpg_data_t plain);
 
 
 /*-- encrypt.c --*/
