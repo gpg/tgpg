@@ -36,6 +36,10 @@ typedef uint32_t keyid_t;
 #include "tgpg.h"
 
 
+/* Library flags.  */
+extern int _tgpg_flags;
+
+
 /* The packet types we need to know about. */
 enum packet_types
   {

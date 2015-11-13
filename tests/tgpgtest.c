@@ -248,15 +248,12 @@ main (int argc, char **argv)
 {
   int err;
   int last_argc = -1;
+  int flags = 0;
 
   if (argc)
     {
       argc--; argv++;
     }
-
-  err = tgpg_init (keystore);
-  if (err)
-    exit (1);
 
   while (argc && last_argc != argc )
     {
@@ -302,6 +299,10 @@ main (int argc, char **argv)
                " [OPTION] [FILE] (try --help for more information)\n");
       exit (1);
     }
+
+  err = tgpg_init (keystore, flags);
+  if (err)
+    exit (1);
 
   if (argc)
     err = process_file (*argv);

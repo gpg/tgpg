@@ -27,6 +27,11 @@
 */
 
 
+/* Library initialization.  */
+
+/* Flags.  */
+
+
 /* Error codes.  */
 enum tgpg_error_codes
   {
@@ -110,7 +115,7 @@ typedef struct tgpg_key_s *tgpg_key_t;
 
 /* Initialize the library.  KEYTABLE must be an array of keys
    terminated by a sentinel value.  Returns 0 on success.  */
-int tgpg_init (const tgpg_key_t keytable);
+int tgpg_init (const tgpg_key_t keytable, int flags);
 
 /* Create a new context as an environment for all operations.  Returns
    0 on success and stores the new context at R_CTX. */

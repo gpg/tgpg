@@ -30,9 +30,11 @@
 #include "pktparser.h"
 #include "keystore.h"
 
+int _tgpg_flags;
+
 /* Initialization.  */
 int
-tgpg_init (const tgpg_key_t keytable)
+tgpg_init (const tgpg_key_t keytable, int flags)
 {
   gcry_control (GCRYCTL_DISABLE_SECMEM, 0);
   if (! gcry_check_version (GCRYPT_VERSION))
@@ -43,6 +45,7 @@ tgpg_init (const tgpg_key_t keytable)
   gcry_control (GCRYCTL_INITIALIZATION_FINISHED, 0);
 
   seckey_table = keytable;
+  _tgpg_flags = flags;
   return TGPG_NO_ERROR;
 }
 
