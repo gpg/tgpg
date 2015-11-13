@@ -121,6 +121,7 @@ tgpg_decrypt (tgpg_t ctx, tgpg_data_t cipher, tgpg_data_t plain)
   size_t seskeylen;
   size_t blocksize = 8;
   const char iv[16] = { 0 };
+  char prefix[18];
 
   /* The decrypted literal data packet.  */
   char *buffer = NULL;
@@ -169,6 +170,7 @@ tgpg_decrypt (tgpg_t ctx, tgpg_data_t cipher, tgpg_data_t plain)
   rc = _tgpg_cipher_decrypt (algo, CIPHER_MODE_CFB_PGP,
                              seskey, seskeylen,
                              iv, blocksize,
+                             prefix, sizeof prefix,
                              buffer, bufferlen,
                              &cipher->image[startoff], length);
   if (rc)

@@ -58,6 +58,7 @@ tgpg_encrypt (tgpg_t ctx, tgpg_data_t plain,
   size_t seskeylen = _tgpg_cipher_keylen (algo);
   size_t blocksize = _tgpg_cipher_blocklen (algo);
   const char iv[16] = { 0 };
+  char prefix[18] = { 0 };
 
   /* The literal data packet.  */
   tgpg_data_t plainpacket = NULL;
@@ -71,6 +72,13 @@ tgpg_encrypt (tgpg_t ctx, tgpg_data_t plain,
     + 1 /* algorithm */
     + seskeylen
     + 2 /* checksum */;
+
+  /* Generate cipher initialization data.  */
+  _tgpg_randomize ((unsigned char *) prefix, blocksize);
+
+  /* Session key quick check, repeat the last two octets.  */
+  prefix[blocksize] = prefix[blocksize-2];
+  prefix[blocksize+1] = prefix[blocksize-1];
 
   /* Firstly, build the literal data packet.  */
   rc = tgpg_data_new (&plainpacket);
@@ -155,6 +163,7 @@ tgpg_encrypt (tgpg_t ctx, tgpg_data_t plain,
   rc = _tgpg_cipher_encrypt (algo, CIPHER_MODE_CFB_PGP,
                              seskey, seskeylen,
                              iv, blocksize,
+                             prefix, blocksize+2,
                              p,
                              cipher->length - WRITTEN,
                              plainpacket->buffer, plainpacket->length);

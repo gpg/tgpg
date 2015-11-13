@@ -256,6 +256,7 @@ cipher_endecrypt (int do_encrypt,
                   int algo, enum cipher_modes mode,
                   const void *key, size_t keylen,
                   const void *iv, size_t ivlen,
+                  char *prefix, size_t prefixlen,
                   void *outbuf, size_t outbufsize,
                   const void * inbuf, size_t inbuflen)
 {
@@ -263,7 +264,6 @@ cipher_endecrypt (int do_encrypt,
   int flags = 0;
   gcry_cipher_hd_t hd;
   size_t bs = _tgpg_cipher_blocklen (algo);
-  char init[18];
 
   switch (mode)
     {
@@ -272,6 +272,8 @@ cipher_endecrypt (int do_encrypt,
     case CIPHER_MODE_CFB_PGP:
       mode = GCRY_CIPHER_MODE_CFB;
       flags |= GCRY_CIPHER_ENABLE_SYNC;
+      if (prefixlen != bs + 2)
+        return TGPG_BUG;
       break;
     default: return TGPG_BUG;
     }
@@ -292,25 +294,27 @@ cipher_endecrypt (int do_encrypt,
     {
       if (do_encrypt)
         {
-          /* Generate initialization data.  */
-          _tgpg_randomize ((unsigned char *) init, bs);
+          /* Check that the last two octets are repeated.  */
+          if (prefix[bs-2] != prefix[bs] || prefix[bs-1] != prefix[bs+1])
+            {
+              err = TGPG_BUG;
+              goto leave;
+            }
 
-          /* Session key quick check, repeat the last two octets.  */
-          init[bs] = init[bs-2];
-          init[bs+1] = init[bs-1];
-
-          err = gcry_cipher_encrypt (hd, outbuf, outbufsize, init, bs+2);
-          outbuf += bs+2, outbufsize -= bs+2;
+          err = gcry_cipher_encrypt (hd, outbuf, outbufsize,
+                                     prefix, prefixlen);
+          outbuf += prefixlen, outbufsize -= prefixlen;
         }
       else
         {
-          err = gcry_cipher_decrypt (hd, init, sizeof init, inbuf, bs+2);
+          err = gcry_cipher_decrypt (hd, prefix, prefixlen,
+                                     inbuf, prefixlen);
           if (err)
             goto leave;
-          inbuf += bs+2, inbuflen -= bs+2;
+          inbuf += prefixlen, inbuflen -= prefixlen;
 
           /* The last two octets are repeated.  */
-          if (init[bs-2] != init[bs] || init[bs-1] != init[bs+1])
+          if (prefix[bs-2] != prefix[bs] || prefix[bs-1] != prefix[bs+1])
             err = TGPG_WRONG_KEY;
         }
       if (err)
@@ -339,10 +343,12 @@ int
 _tgpg_cipher_decrypt (int algo, enum cipher_modes mode,
                       const void *key, size_t keylen,
                       const void *iv, size_t ivlen,
+                      char *prefix, size_t prefixlen,
                       void *outbuf, size_t outbufsize,
                       const void * inbuf, size_t inbuflen)
 {
   return cipher_endecrypt (0, algo, mode, key, keylen, iv, ivlen,
+                           prefix, prefixlen,
                            outbuf, outbufsize, inbuf, inbuflen);
 }
 
@@ -355,10 +361,12 @@ int
 _tgpg_cipher_encrypt (int algo, enum cipher_modes mode,
                       const void *key, size_t keylen,
                       const void *iv, size_t ivlen,
+                      char *prefix, size_t prefixlen,
                       void *outbuf, size_t outbufsize,
                       const void *inbuf, size_t inbuflen)
 {
   return cipher_endecrypt (1, algo, mode, key, keylen, iv, ivlen,
+                           prefix, prefixlen,
                            outbuf, outbufsize, inbuf, inbuflen);
 }
 

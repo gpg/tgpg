@@ -225,6 +225,7 @@ do_decryption (const unsigned char *protected, size_t protectedlen,
       rc = _tgpg_cipher_decrypt (PROT_CIPHER, CIPHER_MODE_CBC,
                                  key, keylen,
                                  iv, ivlen,
+                                 NULL, 0,
                                  outbuf, protectedlen,
                                  protected, protectedlen);
     wipememory (key, keylen);

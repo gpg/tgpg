@@ -52,11 +52,13 @@ unsigned int _tgpg_cipher_keylen (int algo);
 int _tgpg_cipher_decrypt (int algo, enum cipher_modes mode,
                           const void *key, size_t keylen,
                           const void *iv, size_t ivlen,
+                          char *prefix, size_t prefixlen,
                           void *outbuf, size_t outbufsize,
                           const void * inbuf, size_t inbuflen);
 int _tgpg_cipher_encrypt (int algo, enum cipher_modes mode,
                           const void *key, size_t keylen,
                           const void *iv, size_t ivlen,
+                          char *prefix, size_t prefixlen,
                           void *outbuf, size_t outbufsize,
                           const void *inbuf, size_t inbuflen);
 
