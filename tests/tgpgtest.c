@@ -195,7 +195,8 @@ process_file (const char *fname)
 
   inpfile = read_file (fname, &inplen);
   if (!inpfile)
-    goto leave;
+    return TGPG_SYSERROR;
+
   if (verbose)
     fprintf (stderr, PGM": file `%s' of size %lu read\n",
              fname, (unsigned long)inplen);
