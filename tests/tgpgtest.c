@@ -269,6 +269,7 @@ main (int argc, char **argv)
                 "Usage: " PGM " [OPTION] [FILE]\n"
                 "Simple tool to test TGPG.\n\n"
                 "  --encrypt   encrypt rather than decrypt (the default)\n"
+                "  --disable-mdc do not use MDC for encryption\n"
                 "  --verbose   enable extra informational output\n"
                 "  --debug     enable additional debug output\n"
                 "  --help      display this help and exit\n\n"
@@ -279,6 +280,11 @@ main (int argc, char **argv)
       else if (!strcmp (*argv, "--encrypt"))
         {
           opt_encrypt = 1;
+          argc--; argv++;
+        }
+      else if (!strcmp (*argv, "--disable-mdc"))
+        {
+          flags |= TGPG_FLAG_DISABLE_MDC;
           argc--; argv++;
         }
       else if (!strcmp (*argv, "--verbose"))

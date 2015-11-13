@@ -59,6 +59,7 @@ tgpg_encrypt (tgpg_t ctx, tgpg_data_t plain,
   size_t blocksize = _tgpg_cipher_blocklen (algo);
   const char iv[16] = { 0 };
   char prefix[18] = { 0 };
+  int mdc = ! (_tgpg_flags & TGPG_FLAG_DISABLE_MDC);
 
   /* The literal data packet.  */
   tgpg_data_t plainpacket = NULL;
@@ -86,6 +87,8 @@ tgpg_encrypt (tgpg_t ctx, tgpg_data_t plain,
     return rc;
 
   rc = _tgpg_encode_plaintext_message (plainpacket,
+                                       mdc,
+                                       prefix, blocksize+2,
 				       'b',
 				       "",
 				       0,
@@ -137,7 +140,8 @@ tgpg_encrypt (tgpg_t ctx, tgpg_data_t plain,
     /* The pubkey packet,  */
     + _tgpg_write_pubkey_enc_packet (NULL, &keyinfo, encdat, enclen)
     /* and the encrypted data packet.  */
-    + _tgpg_write_sym_enc_packet (NULL, blocksize + 2 + plainpacket->length);
+    + _tgpg_write_sym_enc_packet (NULL, mdc,
+                                  blocksize + 2 + plainpacket->length);
 
   rc = tgpg_data_resize (cipher, length);
   if (rc)
@@ -157,10 +161,11 @@ tgpg_encrypt (tgpg_t ctx, tgpg_data_t plain,
   encdat = NULL;
 
   /* The Symmetrically Encrypted Data Packet.  */
-  _tgpg_write_sym_enc_packet (&p, blocksize + 2 + plainpacket->length);
+  _tgpg_write_sym_enc_packet (&p, mdc, blocksize + 2 + plainpacket->length);
 
   /* Encrypt body.  */
-  rc = _tgpg_cipher_encrypt (algo, CIPHER_MODE_CFB_PGP,
+  rc = _tgpg_cipher_encrypt (algo,
+                             ! mdc ? CIPHER_MODE_CFB_PGP : CIPHER_MODE_CFB_MDC,
                              seskey, seskeylen,
                              iv, blocksize,
                              prefix, blocksize+2,

@@ -123,21 +123,50 @@ _tgpg_write_pubkey_enc_packet (unsigned char **p,
 }
 
 /* Write an OpenPGP symmetrically encrypted packet to *P, and advance
-   *P accordingly.  As the body is merely appended to this header,
-   this function is not concerned with the body itself.  Return the
-   size of the packet.  If P is NULL, no data is actually written.  */
+   *P accordingly.  If MDC is non-zero, write an integrity protected
+   packet of the given version.  As the body is merely appended to
+   this header, this function is not concerned with the body itself.
+   Return the size of the packet.  If P is NULL, no data is actually
+   written.  */
 size_t
-_tgpg_write_sym_enc_packet (unsigned char **p, size_t length)
+_tgpg_write_sym_enc_packet (unsigned char **p, int mdc, size_t length)
 {
-  return write_header (p, PKT_ENCRYPTED, length) + length;
+  size_t mdc_length, packet_length;
+
+  switch (mdc)
+    {
+    case 0:
+      mdc_length = 0;
+      break;
+    case 1:
+      mdc_length = 1;
+      break;
+    default:
+      return TGPG_BUG;
+    }
+
+  packet_length = write_header (p, ! mdc ? PKT_ENCRYPTED : PKT_ENCRYPTED_MDC,
+                                length + mdc_length)
+    + length + mdc_length;
+
+  if (p && mdc)
+    write_u8 (p, mdc);
+
+  return packet_length;
 }
 
 
 /* Construct a plaintext message in MSG, with the given FORMAT,
    FILENAME (which must not be larger than 0xff bytes), DATE, and
-   containing the literal data PAYLOAD of given LENGTH.  */
+   containing the literal data PAYLOAD of given LENGTH.  If MDC is
+   non-zero, create a Modification Detection Code Packet of the given
+   version.  In that case, PREFIX of length PREFIXLEN must be the
+   block cipher initialization data.  */
 int
 _tgpg_encode_plaintext_message (bufdesc_t msg,
+                                int mdc,
+                                const char *prefix,
+                                size_t prefixlen,
 				unsigned char format,
 				const char *filename,
 				time_t date,
@@ -147,9 +176,24 @@ _tgpg_encode_plaintext_message (bufdesc_t msg,
   int rc;
   unsigned char *p;
   size_t header_length;
+  size_t mdc_length;
 
   if (strlen (filename) > 0xff)
     return TGPG_INV_VAL;
+
+  switch (mdc)
+    {
+    case 0:
+      mdc_length = 0;
+      break;
+
+    case 1:
+      mdc_length = 20;
+      break;
+
+    default:
+      return TGPG_BUG;
+    }
 
   header_length =
     + 2 /* format and filename length */
@@ -160,7 +204,10 @@ _tgpg_encode_plaintext_message (bufdesc_t msg,
 			 + header_size (header_length
                                         + length)
 			 + header_length
-			 + length);
+			 + length
+                         + (mdc ? (header_size (mdc_length)
+                                + mdc_length)
+                            : 0));
   if (rc)
     return rc;
 
@@ -181,6 +228,23 @@ _tgpg_encode_plaintext_message (bufdesc_t msg,
 
   /* The literal data.  */
   memcpy (p, payload, length);
+  p += length;
+
+  switch (mdc)
+    {
+      hash_t h;
+    case 1:
+      rc = _tgpg_hash_open (&h, MD_ALGO_SHA1, 0);
+      if (rc)
+        return rc;
+
+      write_header (&p, PKT_MDC, hash_digestlen (h));
+
+      _tgpg_hash_write (h, prefix, prefixlen);
+      _tgpg_hash_write (h, msg->image, p - (unsigned char *) msg->image);
+      memcpy ((char *) p, _tgpg_hash_read (h), hash_digestlen (h));
+      _tgpg_hash_close (h);
+    }
 
   return TGPG_NO_ERROR;
 }

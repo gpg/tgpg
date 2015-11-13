@@ -30,6 +30,7 @@
 /* Library initialization.  */
 
 /* Flags.  */
+#define TGPG_FLAG_DISABLE_MDC	0x01	/* Disable MDC encryption.  */
 
 
 /* Error codes.  */

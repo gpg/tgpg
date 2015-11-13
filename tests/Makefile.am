@@ -57,10 +57,14 @@ keystore.c: $(GPGHOME) ../tools/tgpg-keystore
 
 %.tgpg: % $(TGPG)
 	rm -f -- "$@"
+	$(TGPG) --debug --encrypt --disable-mdc "$<" >"$@" || ( rm "$@" ; exit 1 )
+
+%.tgpg.mdc: % $(TGPG)
+	rm -f -- "$@"
 	$(TGPG) --debug --encrypt "$<" >"$@" || ( rm "$@" ; exit 1 )
 
 TESTFILES	= test0 test1
-TESTFILES_GPG	= $(foreach TEST,$(TESTFILES),$(TEST).gpg $(TEST).gpg.mdc $(TEST).tgpg)
+TESTFILES_GPG	= $(foreach TEST,$(TESTFILES),$(TEST).gpg $(TEST).gpg.mdc $(TEST).tgpg $(TEST).tgpg.mdc)
 
 test0:
 	python -c "import sys; sys.stdout.write(64*'A')" >"$@"

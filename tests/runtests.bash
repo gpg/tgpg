@@ -25,7 +25,9 @@ do
     test "$chksum" = "$(${TGPG} $1.gpg | sha1sum)" && ok || fail
     test "$chksum" = "$(${TGPG} $1.gpg.mdc | sha1sum)" && ok || fail
     test "$chksum" = "$(${TGPG} $1.tgpg | sha1sum)" && ok || fail
+    test "$chksum" = "$(${TGPG} $1.tgpg.mdc | sha1sum)" && ok || fail
     test "$chksum" = "$(${GPG2} $1.tgpg | sha1sum)" && ok || fail
+    test "$chksum" = "$(${GPG2} $1.tgpg.mdc | sha1sum)" && ok || fail
     shift
 done
 
