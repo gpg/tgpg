@@ -23,9 +23,10 @@ while [ "$1" ]
 do
     chksum="$(sha1sum < $1)"
     test "$chksum" = "$(${TGPG} $1.gpg | sha1sum)" && ok || fail
-    test "$chksum" = "$(${TGPG} $1.gpg.mdc | sha1sum)" && ok || fail
+    test "$chksum" = "$(${TGPG} --mandatory-mdc $1.gpg | sha1sum)" && fail || ok
+    test "$chksum" = "$(${TGPG} --mandatory-mdc $1.gpg.mdc | sha1sum)" && ok || fail
     test "$chksum" = "$(${TGPG} $1.tgpg | sha1sum)" && ok || fail
-    test "$chksum" = "$(${TGPG} $1.tgpg.mdc | sha1sum)" && ok || fail
+    test "$chksum" = "$(${TGPG} --mandatory-mdc $1.tgpg.mdc | sha1sum)" && ok || fail
     test "$chksum" = "$(${GPG2} $1.tgpg | sha1sum)" && ok || fail
     test "$chksum" = "$(${GPG2} $1.tgpg.mdc | sha1sum)" && ok || fail
     shift

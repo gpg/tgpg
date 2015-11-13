@@ -31,6 +31,8 @@
 
 /* Flags.  */
 #define TGPG_FLAG_DISABLE_MDC	0x01	/* Disable MDC encryption.  */
+#define TGPG_FLAG_MANDATORY_MDC	0x02	/* Make MDC mandatory when
+					   decrypting files.  */
 
 
 /* Error codes.  */

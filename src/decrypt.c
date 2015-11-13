@@ -152,7 +152,13 @@ tgpg_decrypt (tgpg_t ctx, tgpg_data_t cipher, tgpg_data_t plain)
     goto leave;
 
   if (! mdc)
-    fprintf (stderr, "tgpg: WARNING: message was not integrity protected\n");
+    {
+      int mandatory = _tgpg_flags & TGPG_FLAG_MANDATORY_MDC;
+      fprintf (stderr, "tgpg: %s: message was not integrity protected\n",
+               mandatory ? "ERROR" : "WARNING");
+      if (mandatory)
+        return TGPG_MDC_FAILED;
+    }
 
   rc = decrypt_session_key (keyinfo, encdat, &algo, &seskey, &seskeylen);
   if (rc)
