@@ -45,6 +45,7 @@ enum cipher_modes
     CIPHER_MODE_CBC	= 1,
     CIPHER_MODE_CFB	= 2,
     CIPHER_MODE_CFB_PGP	= 3,
+    CIPHER_MODE_CFB_MDC	= 4,
   };
 
 unsigned int _tgpg_cipher_blocklen (int algo);

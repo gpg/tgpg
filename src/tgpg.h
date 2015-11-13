@@ -47,6 +47,7 @@ enum tgpg_error_codes
     TGPG_NO_SECKEY,      /* No secret key found.  */
     TGPG_CRYPT_ERR,      /* Error from the crypto layer.  */
     TGPG_WRONG_KEY,      /* Wrong key; can't decrypt using this key.  */
+    TGPG_MDC_FAILED,     /* The integrity check failed.  */
 
     TGPG_NOT_IMPL,       /* Not implemented.  */
     TGPG_BUG             /* Internal error.  */

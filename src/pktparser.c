@@ -355,6 +355,7 @@ _tgpg_parse_encrypted_message (bufdesc_t msg, int *r_mdc,
 
   image = msg->image;
   imagelen = msg->length;
+  *r_mdc = 0;
 
   while (image)
     {
@@ -389,8 +390,12 @@ _tgpg_parse_encrypted_message (bufdesc_t msg, int *r_mdc,
             }
           break;
 
-        case PKT_ENCRYPTED:
         case PKT_ENCRYPTED_MDC:
+          *r_mdc = *(unsigned char *) data;
+          data += 1, datalen -= 1;
+          /* Fallthrough.  */
+
+        case PKT_ENCRYPTED:
           /* We are right at the start of the encrypted stuff.  Make
              sure that it is only one packet and remove any partial
              headers. */
@@ -415,14 +420,19 @@ _tgpg_parse_encrypted_message (bufdesc_t msg, int *r_mdc,
 }
 
 /* Given an plaintext message, parse it and return any payload and
-   metadata associated with it.  On success the function returns the
-   format in R_FORMAT, the original filename in R_FILENAME (which must
-   hold at least 256 bytes and will be zero-terminated), a date in
-   R_DATE, an offset to the begin of the actual plaintext data packet
-   at R_START, and its length at R_LENGTH.  The return values are not
-   defined on error.  */
+   metadata associated with it.  If MDC is non-zero, it specifies the
+   version of the integrity protocol.  PREFIX of length PREFIXLEN must
+   be the cipher initialization data.  On success the function returns
+   the format in R_FORMAT, the original filename in R_FILENAME (which
+   must hold at least 256 bytes and will be zero-terminated), a date
+   in R_DATE, an offset to the begin of the actual plaintext data
+   packet at R_START, and its length at R_LENGTH.  The return values
+   are not defined on error.  */
 int
 _tgpg_parse_plaintext_message (bufdesc_t msg,
+                               int mdc,
+                               const char *prefix,
+                               size_t prefixlen,
                                unsigned char *r_format,
                                char *r_filename,
                                time_t *r_date,
@@ -434,6 +444,8 @@ _tgpg_parse_plaintext_message (bufdesc_t msg,
   size_t imagelen, datalen, n;
   int pkttype;
   int plaintext_seen = 0;
+  int mdc_seen = 0;
+  hash_t h;
 
   image = msg->image;
   imagelen = msg->length;
@@ -447,7 +459,7 @@ _tgpg_parse_plaintext_message (bufdesc_t msg,
       switch (pkttype)
         {
         case PKT_PLAINTEXT:
-          if (plaintext_seen)
+          if (plaintext_seen || mdc_seen)
             return TGPG_UNEXP_PKT;
           plaintext_seen = 1;
 
@@ -466,11 +478,45 @@ _tgpg_parse_plaintext_message (bufdesc_t msg,
           }
           break;
 
+        case PKT_MDC:
+          if (! plaintext_seen || mdc_seen)
+            return TGPG_UNEXP_PKT;
+
+          switch (mdc)
+            {
+            case 1:
+              if (datalen != 20)
+                return TGPG_INV_PKT;
+              break;
+
+              rc = _tgpg_hash_open (&h, MD_ALGO_SHA1, 0);
+              if (rc)
+                return rc;
+
+              _tgpg_hash_write (h, prefix, prefixlen);
+              _tgpg_hash_write (h, msg->image, &data[2] - msg->image);
+
+              if (memcmp (&data[2], _tgpg_hash_read (h), 20) != 0)
+                {
+                  _tgpg_hash_close (h);
+                  return TGPG_MDC_FAILED;
+                }
+              _tgpg_hash_close (h);
+              break;
+
+            case 0:
+            default:
+              return TGPG_UNEXP_PKT;
+            }
+
+          mdc_seen = 1;
+          break;
+
         default:
           /* We don't expect any other packets. */
           return TGPG_UNEXP_PKT;
         }
     }
 
-  return plaintext_seen? 0: TGPG_INV_MSG;
+  return plaintext_seen && (! mdc || mdc_seen) ? TGPG_NO_ERROR : TGPG_INV_MSG;
 }

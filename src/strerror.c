@@ -49,6 +49,7 @@ tgpg_strerror (int err)
     case TGPG_NO_SECKEY: return "No secret key found";
     case TGPG_CRYPT_ERR: return "Crypto error";
     case TGPG_WRONG_KEY: return "Wrong key";
+    case TGPG_MDC_FAILED:return "Integrity check failed";
     case TGPG_NOT_IMPL:  return "Not implemented by TGPG";
     case TGPG_BUG:       return "Internal error in TGPG";
     default:             return "Unknown TGPG error code";

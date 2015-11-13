@@ -151,6 +151,9 @@ tgpg_decrypt (tgpg_t ctx, tgpg_data_t cipher, tgpg_data_t plain)
   if (rc)
     goto leave;
 
+  if (! mdc)
+    fprintf (stderr, "tgpg: WARNING: message was not integrity protected\n");
+
   rc = decrypt_session_key (keyinfo, encdat, &algo, &seskey, &seskeylen);
   if (rc)
     goto leave;
@@ -167,7 +170,8 @@ tgpg_decrypt (tgpg_t ctx, tgpg_data_t cipher, tgpg_data_t plain)
     }
 
   /* Decrypt body.  */
-  rc = _tgpg_cipher_decrypt (algo, CIPHER_MODE_CFB_PGP,
+  rc = _tgpg_cipher_decrypt (algo,
+                             ! mdc ? CIPHER_MODE_CFB_PGP : CIPHER_MODE_CFB_MDC,
                              seskey, seskeylen,
                              iv, blocksize,
                              prefix, sizeof prefix,
@@ -193,6 +197,8 @@ tgpg_decrypt (tgpg_t ctx, tgpg_data_t cipher, tgpg_data_t plain)
 
   /* Finally, parse the decrypted data...  */
   rc = _tgpg_parse_plaintext_message (plainpacket,
+                                      mdc,
+                                      prefix, sizeof prefix,
                                       &format,
                                       filename,
                                       &date,

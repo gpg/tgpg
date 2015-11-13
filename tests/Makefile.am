@@ -49,14 +49,18 @@ keystore.c: $(GPGHOME) ../tools/tgpg-keystore
 
 %.gpg: %
 	rm -f -- "$@"
-	$(GPG) $(GPGFLAGSH) --recipient `$(GPGX) | grep '^sub' | cut -d: -f5` --disable-mdc -z0 --batch --encrypt "$<"
+	$(GPG) $(GPGFLAGSH) --recipient `$(GPGX) | grep '^sub' | cut -d: -f5` --disable-mdc -z0 --batch --encrypt --output="$@" "$<"
+
+%.gpg.mdc: %
+	rm -f -- "$@"
+	$(GPG) $(GPGFLAGSH) --recipient `$(GPGX) | grep '^sub' | cut -d: -f5` --force-mdc -z0 --batch --encrypt --output="$@" "$<"
 
 %.tgpg: % $(TGPG)
 	rm -f -- "$@"
 	$(TGPG) --debug --encrypt "$<" >"$@" || ( rm "$@" ; exit 1 )
 
 TESTFILES	= test0 test1
-TESTFILES_GPG	= $(foreach TEST,$(TESTFILES),$(TEST).gpg $(TEST).tgpg)
+TESTFILES_GPG	= $(foreach TEST,$(TESTFILES),$(TEST).gpg $(TEST).gpg.mdc $(TEST).tgpg)
 
 test0:
 	python -c "import sys; sys.stdout.write(64*'A')" >"$@"

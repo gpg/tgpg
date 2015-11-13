@@ -262,6 +262,7 @@ cipher_endecrypt (int do_encrypt,
 {
   gpg_error_t err;
   int flags = 0;
+  int pgp_cipher_init = 0;
   gcry_cipher_hd_t hd;
   size_t bs = _tgpg_cipher_blocklen (algo);
 
@@ -270,8 +271,11 @@ cipher_endecrypt (int do_encrypt,
     case CIPHER_MODE_CBC: mode = GCRY_CIPHER_MODE_CBC; break;
     case CIPHER_MODE_CFB: mode = GCRY_CIPHER_MODE_CFB; break;
     case CIPHER_MODE_CFB_PGP:
-      mode = GCRY_CIPHER_MODE_CFB;
       flags |= GCRY_CIPHER_ENABLE_SYNC;
+      /* Fallthrough.  */
+    case CIPHER_MODE_CFB_MDC:
+      mode = GCRY_CIPHER_MODE_CFB;
+      pgp_cipher_init = 1;
       if (prefixlen != bs + 2)
         return TGPG_BUG;
       break;
@@ -288,9 +292,8 @@ cipher_endecrypt (int do_encrypt,
   if (err)
     goto leave;
 
-  /* If CIPHER_MODE_CFB_PGP is used, handle cipher initialization and
-     re-synchronization.  */
-  if (flags & GCRY_CIPHER_ENABLE_SYNC)
+  /* Handle cipher initialization and re-synchronization.  */
+  if (pgp_cipher_init)
     {
       if (do_encrypt)
         {

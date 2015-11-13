@@ -28,6 +28,9 @@ int _tgpg_parse_encrypted_message (bufdesc_t msg, int *r_mdc,
                                    keyinfo_t r_keyinfo, tgpg_mpi_t r_encdat);
 
 int _tgpg_parse_plaintext_message (bufdesc_t msg,
+				   int mdc,
+				   const char *prefix,
+				   size_t prefixlen,
 				   unsigned char *r_format,
 				   char *r_filename,
 				   time_t *r_date,
