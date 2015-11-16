@@ -19,7 +19,7 @@
    MA 02110-1301, USA.
 
 
-   Note: This code has orginally been written for NewPG and then in
+   Note: This code has originally been written for NewPG and then in
    turn integrated into GnuPG 1.9.  It has entirely been written by
    g10 Code staff.  */
 
