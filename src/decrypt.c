@@ -117,7 +117,7 @@ tgpg_decrypt (tgpg_t ctx, tgpg_data_t cipher, tgpg_data_t plain)
   /* Block cipher parameters.  */
   int mdc = 0;
   int algo;
-  char *seskey;
+  char *seskey = NULL;
   size_t seskeylen;
   size_t blocksize = 8;
   const char iv[16] = { 0 };
@@ -223,6 +223,11 @@ tgpg_decrypt (tgpg_t ctx, tgpg_data_t cipher, tgpg_data_t plain)
   memcpy (plain->buffer, &plainpacket->buffer[start], length);
 
  leave:
+  if (seskey)
+    {
+      wipememory (seskey, seskeylen);
+      xfree (seskey);
+    }
   tgpg_data_release (plainpacket);
   xfree (buffer);
   xfree (encdat);
