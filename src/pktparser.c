@@ -128,7 +128,6 @@ next_packet (char const **bufptr, size_t *buflen,
   if ( !(ctb & 0x80) )
     return TGPG_INV_PKT;  /* The CTB is not valid.  */
 
-  pktlen = 0;
   if ((ctb & 0x40))  /* New style CTB.  */
     {
       pkttype = (ctb & 0x3f);
