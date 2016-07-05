@@ -34,6 +34,7 @@
 #include <gcrypt.h>
 
 #define PGM "tgpg-keystore"
+#define DIM(v)		     (sizeof(v)/sizeof((v)[0]))
 
 static const char *name = "keystore";
 static int verbose;
@@ -175,9 +176,13 @@ process_file (const struct keyid *keyid, const char *fname, FILE *stream)
 {
   char *inpfile;
   size_t inplen;
-  gcry_sexp_t sexp;
+  gcry_sexp_t sexp = NULL;
   gcry_error_t err;
   unsigned int keysize;
+  const char *keys = "nedpqu";
+  const int shifts[] = {0, 0, 0, 1, 1, 1};
+  gcry_mpi_t mpis[7] = {};
+  int i;
 
   inpfile = read_file (fname, &inplen);
   if (!inpfile)
@@ -190,9 +195,6 @@ process_file (const struct keyid *keyid, const char *fname, FILE *stream)
   if (err)
     goto leave;
 
-  const char *keys = "nedpqu";
-  const int shifts[] = {0, 0, 0, 1, 1, 1};
-  gcry_mpi_t mpis[7] = {};
   err = gcry_sexp_extract_param (sexp, "private-key", keys,
 				 &mpis[0],
 				 &mpis[1],
@@ -212,7 +214,6 @@ process_file (const struct keyid *keyid, const char *fname, FILE *stream)
            "    {\n",
            keyid->high, keyid->low);
 
-  int i;
   for (i = 0; i < 6; i++)
     {
       unsigned char *buf, *data;
@@ -286,6 +287,9 @@ process_file (const struct keyid *keyid, const char *fname, FILE *stream)
 
  leave:
   free (inpfile);
+  gcry_sexp_release (sexp);
+  for (i = 0; i < DIM (mpis); i++)
+    gcry_mpi_release (mpis[i]);
 }
 
 int
