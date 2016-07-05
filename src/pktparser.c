@@ -42,7 +42,7 @@ get_u32 (const char *buffer)
   const unsigned char *s = (const unsigned char*)buffer;
   unsigned long val;
 
-  val  = (*s++) << 24;
+  val  = (unsigned long) (*s++) << 24;
   val |= (*s++) << 16;
   val |= (*s++) << 8;
   val |= (*s++);
