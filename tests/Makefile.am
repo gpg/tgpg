@@ -31,7 +31,7 @@ tgpgtest_LDADD = $(LIBGCRYPT_LIBS) -L../src -ltgpg
 
 # Key generation
 GPG		?= gpg2
-TGPG		?= ./tgpgtest
+TGPG		?= ./tgpgtest$(EXEEXT)
 GPGHOME		?= gpghome
 GPGFLAGS	?=
 GPGFLAGSH	 = --homedir "$(GPGHOME)" $(GPGFLAGS)
@@ -44,8 +44,8 @@ gpghome: key.script
 	chmod 700 "$@"
 	$(GPG) --homedir "$@" $(GPGFLAGS) --gen-key --batch '$<'
 
-keystore.c: $(GPGHOME) ../tools/tgpg-keystore
-	../tools/tgpg-keystore \
+keystore.c: $(GPGHOME) ../tools/tgpg-keystore$(EXEEXT)
+	../tools/tgpg-keystore$(EXEEXT) \
 		`$(GPGX) | grep '^sub' | cut -d: -f5` \
 		"$<"/private-keys-v1.d/`$(GPGX) | grep '^grp' | tail -n 1 | cut -d: -f10`.key >"$@"
 
