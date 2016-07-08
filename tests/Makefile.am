@@ -37,6 +37,8 @@ GPGFLAGS	?=
 GPGFLAGSH	 = --homedir "$(GPGHOME)" $(GPGFLAGS)
 GPGX		 = $(GPG) $(GPGFLAGSH) --with-colons --with-keygrip -k
 
+EXTRA_DIST = key.script runtests.bash
+
 gpghome: key.script
 	mkdir "$@"
 	chmod 700 "$@"
@@ -76,5 +78,6 @@ test1:
 check: tgpgtest $(TESTFILES_GPG)
 	$(top_srcdir)/tests/runtests.bash $(TESTFILES)
 
+CLEANFILES = keystore.c $(TESTFILES) $(TESTFILES_GPG)
 clean-local:
-	rm -rf -- gpghome $(TESTFILES) $(TESTFILES_GPG)
+	rm -rf -- gpghome
